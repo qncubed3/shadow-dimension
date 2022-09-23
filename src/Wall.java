@@ -1,8 +1,6 @@
 import bagel.Image;
-import bagel.util.Point;
-import bagel.util.Rectangle;
 
-public class Wall extends Entity {
+public class Wall extends Obstacle {
     // Wall attributes
     private static Image wallImage = new Image("res/wall.png");
 

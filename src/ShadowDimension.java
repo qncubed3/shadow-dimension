@@ -20,11 +20,11 @@ public class ShadowDimension extends AbstractGame {
     private final int SINKHOLE_DAMAGE = 30;
     private static int WINDOW_WIDTH = 1024;
     private static int WINDOW_HEIGHT = 768;
-    private final Image BACKGROUND_IMAGE = new Image("res/background0.png");
+    private final Image BACKGROUND_IMAGE_0 = new Image("res/background0.png");
+    private final Image BACKGROUND_IMAGE_1 = new Image("res/background1.png");
     private static final int RED_HEALTH_MAX = 35;
     private static final int ORANGE_HEALTH_MAX = 65;
     private static final Point WIN_POINT = new Point(950, 670);
-    private final static String GAME_TITLE = "SHADOW DIMENSION";
 
     // Direction constants
     private static final Point LEFT = new Point(-SPEED, 0);
@@ -37,8 +37,11 @@ public class ShadowDimension extends AbstractGame {
     private static final int RUNNING = 1;
     private static final int LOSE = -1;
     private static final int WIN = 2;
+    private static final int LEVEL_0 = 0;
+    private static final int LEVEL_1 = 1;
 
     // Font, text and colour settings
+    private static final String GAME_TITLE = "SHADOW DIMENSION";
     private static final String font = "res/frostbite.ttf";
     private static final int TITLE_SIZE = 75;
     private static final int MESSAGE_SIZE = 40;
@@ -55,13 +58,16 @@ public class ShadowDimension extends AbstractGame {
     private static final Point WIN_MESSAGE_POINT = new Point(260, 380);
     private static final Point LOSE_MESSAGE_POINT = new Point(350, 380);
     private static final Point GAME_TITLE_POINT = new Point(260, 250);
-    private static final Point INSTRUCTION_POINT1 = new Point(350, 440);
-    private static final Point INSTRUCTION_POINT2 = new Point(300, 550);
+    private static final Point INSTRUCTION_POINT_1 = new Point(350, 440);
+    private static final Point INSTRUCTION_POINT_2 = new Point(300, 550);
+    private static final Point INSTRUCTION_POINT_3 = new Point(350, 300);
+    private static final Point INSTRUCTION_POINT_4 = new Point(375, 380);
+    private static final Point INSTRUCTION_POINT_5 = new Point(360, 460);
     private static final Point HEALTH_DISPLAY_POINT = new Point(20, 25);
 
     // Entities
     private static Player player;
-    private static ArrayList<Wall> walls = new ArrayList<>();
+    private static ArrayList<Obstacle> obstacles = new ArrayList<>();
     private static ArrayList<Sinkhole> sinkholes = new ArrayList<>();
 
     // Other constants and attributes
@@ -70,6 +76,9 @@ public class ShadowDimension extends AbstractGame {
     private static final double PERCENT = 100.0;
     private static Rectangle boundary;
     private static int gameState;
+    private static int level = LEVEL_0;
+    private static int level_0_read = 0;
+    private static int level_1_read = 0;
 
     // Game constructor
     public ShadowDimension() {
@@ -78,14 +87,25 @@ public class ShadowDimension extends AbstractGame {
 
     // The entry point for the program.
     public static void main(String[] args) {
-
         ShadowDimension game = new ShadowDimension();
-        readCSV();
         game.run();
     }
 
     // Reads data from provided level CSV file
-    private static void readCSV(){
+    private static void readCSV() {
+        if (level_0_read == 0 && level == LEVEL_0) {
+            readLevel0();
+            level_0_read = 1;
+        } else if (level_1_read == 0 && level == LEVEL_1) {
+            removeObstacles();
+            readLevel1();
+            level_1_read = 1;
+        }
+    }
+
+    // Read level 0
+    private static void readLevel0() {
+        
         try (BufferedReader reader = new BufferedReader(new FileReader("res/level0.csv"))) {
             // Declare buffer parameters
             String buffer = null;
@@ -114,7 +134,7 @@ public class ShadowDimension extends AbstractGame {
                     // Get wall parameters and add wall to arraylist of walls
                     xPosition = Integer.parseInt(cells[COLUMN1]);
                     yPosition = Integer.parseInt(cells[COLUMN2]);
-                    walls.add(new Wall(xPosition, yPosition));
+                    obstacles.add(new Wall(xPosition, yPosition));
                     // If a sinkhole is read
                 } else if (cells[0].equals("Sinkhole")) {
                     // Get sinkhole parameters and add sinkhole to arraylist of sinkholes
@@ -133,6 +153,63 @@ public class ShadowDimension extends AbstractGame {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // Read level 1
+    private static void readLevel1() {
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader("res/level1.csv"))) {
+            // Declare buffer parameters
+            String buffer = null;
+            int playerCount = 0;
+            int xPosition;
+            int yPosition;
+            Point topLeft = new Point();
+            Point bottomRight = new Point();
+            // Read through each line of CSV file and split into array of strings across commas
+            while ((buffer = reader.readLine()) != null) {
+                String cells[] = buffer.split(",");
+                // If player is read
+                if (cells[0].equals(player.getName())) {
+                    // Check that no more than 1 player is read
+                    if (playerCount >= 1) {
+                        System.out.println("Invalid level");
+                        System.exit(1);
+                    }
+                    // Get player parameters and define player
+                    xPosition = Integer.parseInt(cells[COLUMN1]);
+                    yPosition = Integer.parseInt(cells[COLUMN2]);
+                    player = new Player("Fae", xPosition, yPosition);
+                    playerCount++;
+                    // If a wall is read
+                } else if (cells[0].equals("Tree")) {
+                    // Get tree parameters and add wall to arraylist of walls
+                    xPosition = Integer.parseInt(cells[COLUMN1]);
+                    yPosition = Integer.parseInt(cells[COLUMN2]);
+                    obstacles.add(new Tree(xPosition, yPosition));
+                    // If a sinkhole is read
+                } else if (cells[0].equals("Sinkhole")) {
+                    // Get sinkhole parameters and add sinkhole to arraylist of sinkholes
+                    xPosition = Integer.parseInt(cells[COLUMN1]);
+                    yPosition = Integer.parseInt(cells[2]);
+                    sinkholes.add(new Sinkhole(xPosition, yPosition));
+                } else if (cells[0].equals("TopLeft")) {
+                    // Get top left coordinate of window
+                    topLeft = new Point(Integer.parseInt(cells[COLUMN1]), Integer.parseInt(cells[COLUMN2]));
+                } else if (cells[0].equals("BottomRight")) {
+                    // Get bottom right coordinate of window
+                    bottomRight = new Point(Integer.parseInt(cells[COLUMN1]), Integer.parseInt(cells[COLUMN2]));
+                }
+            }
+            boundary = new Rectangle(topLeft, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void removeObstacles() {
+        obstacles.removeAll(obstacles);
+        sinkholes.removeAll(sinkholes);
     }
 
     // Returns true if player is not colliding with the border defined by point, and false if a collision occurs
@@ -155,17 +232,17 @@ public class ShadowDimension extends AbstractGame {
     }
 
     // Returns true if player will not collide with a wall, false otherwise
-    private boolean checkWallCollision(Point direction) {
+    private boolean checkObstacleCollision(Point direction) {
         // Go to each wall
-        for (Wall wall: walls) {
+        for (Obstacle obstacle: obstacles) {
             // Return false if current direction of player has/will contact a wall
-            if (direction.equals(RIGHT) && player.contactsWall(wall, RIGHT)) {
+            if (direction.equals(RIGHT) && player.contactsObstacle(obstacle, RIGHT)) {
                 return false;
-            } else if (direction.equals(LEFT) && player.contactsWall(wall, LEFT)) {
+            } else if (direction.equals(LEFT) && player.contactsObstacle(obstacle, LEFT)) {
                 return false;
-            } else if (direction.equals(UP) && player.contactsWall(wall, UP)) {
+            } else if (direction.equals(UP) && player.contactsObstacle(obstacle, UP)) {
                 return false;
-            } else if (direction.equals(DOWN) && player.contactsWall(wall, DOWN)) {
+            } else if (direction.equals(DOWN) && player.contactsObstacle(obstacle, DOWN)) {
                 return false;
             }
         }
@@ -212,22 +289,30 @@ public class ShadowDimension extends AbstractGame {
 
     // Draw game obstacles
     private void drawObstacles() {
-        // Draw all the walls in arraylist of walls
-        for (Wall wall: walls) {
-            wall.draw();
+        // Draw all the walls and trees in arraylist of obstacles
+        for (Obstacle obstacle: obstacles) {
+            obstacle.draw();
         }
 
         // Draw all the sinkholes in arraylist of sinkholes
         for (Sinkhole sinkhole: sinkholes) {
             sinkhole.draw();
         }
+
     }
 
     // Displays components of start screen
     private void runStartScreen(Input input) {
-        titleMessage.drawString(GAME_TITLE, GAME_TITLE_POINT.x, GAME_TITLE_POINT.y);
-        instructionMessage.drawString("PRESS SPACE TO START", INSTRUCTION_POINT1.x, INSTRUCTION_POINT1.y);
-        instructionMessage.drawString("USE ARROW KEYS TO FIND GATE", INSTRUCTION_POINT2.x, INSTRUCTION_POINT2.y);
+        if (level == LEVEL_0) {
+            titleMessage.drawString(GAME_TITLE, GAME_TITLE_POINT.x, GAME_TITLE_POINT.y);
+            instructionMessage.drawString("PRESS SPACE TO START", INSTRUCTION_POINT_1.x, INSTRUCTION_POINT_1.y);
+            instructionMessage.drawString("USE ARROW KEYS TO FIND GATE", INSTRUCTION_POINT_2.x, INSTRUCTION_POINT_2.y);
+        } else if (level == LEVEL_1) {
+            instructionMessage.drawString("PRESS SPACE TO START", INSTRUCTION_POINT_3.x, INSTRUCTION_POINT_3.y);
+            instructionMessage.drawString("PRESS A TO ATTACK", INSTRUCTION_POINT_4.x, INSTRUCTION_POINT_4.y);
+            instructionMessage.drawString("DEFEAT NAVEC TO WIN", INSTRUCTION_POINT_5.x, INSTRUCTION_POINT_5.y);
+        }
+        
         if (input.isDown(Keys.SPACE)) {
             gameState = RUNNING;
         }
@@ -235,31 +320,35 @@ public class ShadowDimension extends AbstractGame {
 
     private void runGameScreen(Input input) {
         // Get key input and move if possible
-        if (input.isDown(Keys.LEFT) && checkBorderCollision(LEFT) && checkWallCollision(LEFT)) {
+        if (input.isDown(Keys.LEFT) && checkBorderCollision(LEFT) && checkObstacleCollision(LEFT)) {
             player.move(LEFT);
         }
-        if (input.isDown(Keys.RIGHT) && checkBorderCollision(RIGHT) && checkWallCollision(RIGHT)) {
+        if (input.isDown(Keys.RIGHT) && checkBorderCollision(RIGHT) && checkObstacleCollision(RIGHT)) {
             player.move(RIGHT);
         }
-        if (input.isDown(Keys.UP) && checkBorderCollision(UP) && checkWallCollision(UP)) {
+        if (input.isDown(Keys.UP) && checkBorderCollision(UP) && checkObstacleCollision(UP)) {
             player.move(UP);
         }
-        if (input.isDown(Keys.DOWN) && checkBorderCollision(DOWN) && checkWallCollision(DOWN)) {
+        if (input.isDown(Keys.DOWN) && checkBorderCollision(DOWN) && checkObstacleCollision(DOWN)) {
             player.move(DOWN);
         }
+        
 
         // Check sinkhole overlap
-        checkSinkholeCollision();
-
-        // Draw game elements
-        BACKGROUND_IMAGE.drawFromTopLeft(0, 0);
+        drawBackground();
         drawObstacles();
         drawHealthBar();
+        checkSinkholeCollision();
         player.draw();
 
         // Check win condition
         if (player.getPosition().x >= WIN_POINT.x && player.getPosition().y >= WIN_POINT.y) {
-            gameState = WIN;
+            if (level == LEVEL_0) {
+                level = LEVEL_1;
+                gameState = START;
+            } else if (level == LEVEL_1) {
+                gameState = WIN;
+            }
         }
 
         // Check lose condition
@@ -268,9 +357,30 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
+    private void drawBackground() {
+        switch(level) {
+            case LEVEL_0: 
+                BACKGROUND_IMAGE_0.drawFromTopLeft(0, 0);
+                break;
+            case LEVEL_1:
+                BACKGROUND_IMAGE_1.drawFromTopLeft(0, 0);
+                break;
+        }
+    }
+
     // Performs a state update. Allows the game to exit when the escape key is pressed.
     @Override
     protected void update(Input input) {
+
+        readCSV();
+
+        // Testing
+        if (input.isDown(Keys.W)) {
+            level = LEVEL_1;
+            gameState = START;
+        }
+
+
         // Display start screen
         if (gameState == START) {
             runStartScreen(input);

@@ -1,8 +1,6 @@
 import bagel.Image;
-import bagel.util.Point;
-import bagel.util.Rectangle;
 
-public class Sinkhole extends Entity {
+public class Sinkhole extends Obstacle {
     // Sinkhole attributes
     private static final Image sinkholeImage = new Image("res/sinkhole.png");
 

@@ -2,7 +2,6 @@ import bagel.Image;
 import bagel.util.Point;
 import bagel.util.Rectangle;
 
-import java.util.ArrayList;
 
 public class Player extends Entity {
     // Player attributes
@@ -10,8 +9,8 @@ public class Player extends Entity {
     private final int MAX_HEALTH = 100;
     private int health = MAX_HEALTH;
     private boolean rightFacing = true;
-    private static final Image leftFacingPlayer = new Image("res/faeLeft.png");
-    private static final Image rightFacingPlayer = new Image("res/faeRight.png");
+    private static final Image leftFacingPlayer = new Image("res/fae/faeLeft.png");
+    private static final Image rightFacingPlayer = new Image("res/fae/faeRight.png");
 
     // Player constructor
     public Player(String name, int xInitial, int yInitial) {
@@ -42,23 +41,23 @@ public class Player extends Entity {
     }
 
     // Test if player will contact given wall
-    public boolean contactsWall(Wall wall, Point direction) {
+    public boolean contactsObstacle(Obstacle obstacle, Point direction) {
         // Calculate the next position of the player
         Rectangle nextBoundary = new Rectangle(
                 super.getPosition().x + direction.x, super.getPosition().y + direction.y,
                 this.getWidth(), this.getHeight()
         );
         // Returns true if player will contact wall given current direction in the next step
-        return nextBoundary.intersects(wall.getBoundary());
+        return nextBoundary.intersects(obstacle.getBoundary());
     }
 
     // Getter methods
     public double getHeight() {
-        return this.leftFacingPlayer.getHeight();
+        return Player.leftFacingPlayer.getHeight();
     }
 
     public double getWidth() {
-        return this.leftFacingPlayer.getWidth();
+        return Player.leftFacingPlayer.getWidth();
     }
 
     public int getHealth() {
