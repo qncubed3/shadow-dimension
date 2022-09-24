@@ -1,3 +1,7 @@
+import java.time.chrono.IsoEra;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import bagel.Image;
 import bagel.util.Point;
 import bagel.util.Rectangle;
@@ -8,56 +12,92 @@ public class Player extends Entity {
     private final String name;
     private final int MAX_HEALTH = 100;
     private int health = MAX_HEALTH;
-    private boolean rightFacing = true;
-    private static final Image leftFacingPlayer = new Image("res/fae/faeLeft.png");
-    private static final Image rightFacingPlayer = new Image("res/fae/faeRight.png");
+    private boolean isRightFacing = true;
+    private boolean isAttacking = false;
+    private boolean isInvincible = false;
+    private static ArrayList<Image> images = new ArrayList<>(Arrays.asList(
+        new Image("res/fae/faeRight.png"),
+        new Image("res/fae/faeLeft.png"),
+        new Image("res/fae/faeAttackRight.png"),
+        new Image("res/fae/faeAttackLeft.png")
+    ));
+    private static final int PLAYER_RIGHT = 0;
+    private static final int PLAYER_LEFT = 1;
+    private static final int ATTACK_RIGHT = 2;
+    private static final int ATTACK_LEFT = 3;
+
+    private static final int ATTACK_TIME = 60;
+    private static int attackDuration = 0;
 
     // Player constructor
     public Player(String name, int xInitial, int yInitial) {
-        super(xInitial, yInitial);
+        super(images, xInitial, yInitial);
         this.name = name;
     }
 
-    // Draw player image onto game window
-    @Override
-    public void draw() {
-        if (rightFacing) {
-            rightFacingPlayer.drawFromTopLeft(super.getPosition().x, super.getPosition().y);
-        } else {
-            leftFacingPlayer.drawFromTopLeft(super.getPosition().x, super.getPosition().y);
-        }
-    }
 
     // Move player by given vector
     public void move(Point vector) {
         // Update position and boundary of player
         super.move(vector);
-        // Update player image if direction has changed
         if (vector.x < 0) {
-            rightFacing = false;
+            isRightFacing = false;
         } else if (vector.x > 0) {
-            rightFacing = true;
+            isRightFacing = true;
         }
+        // Update player image if direction has changed
+        updateImage();
+    }
+
+    public void updateImage() {
+        if (attackDuration >= ATTACK_TIME) {
+            isAttacking = false;
+            attackDuration = 0;
+        }
+        if (isAttacking) {
+            attackDuration++;
+        }
+        if (!isRightFacing) {
+            if (isAttacking) {
+                super.setImageState(ATTACK_LEFT);
+            } else {
+                super.setImageState(PLAYER_LEFT);
+            }
+        } else if (isRightFacing) {
+            if (isAttacking) {
+                super.setImageState(ATTACK_RIGHT);
+            } else {
+                super.setImageState(PLAYER_RIGHT);
+            }
+        }
+        this.draw();
     }
 
     // Test if player will contact given wall
-    public boolean contactsObstacle(Obstacle obstacle, Point direction) {
+    public boolean contactsEntity(Entity entity, Point direction) {
         // Calculate the next position of the player
+        if (entity.getExists() == false) {
+            return false;
+        }
         Rectangle nextBoundary = new Rectangle(
                 super.getPosition().x + direction.x, super.getPosition().y + direction.y,
                 this.getWidth(), this.getHeight()
         );
         // Returns true if player will contact wall given current direction in the next step
-        return nextBoundary.intersects(obstacle.getBoundary());
+        return nextBoundary.intersects(entity.getBoundary());
+    }
+
+    public void takeDamage(int damage) {
+        health = Math.max(health - damage, 0);
     }
 
     // Getter methods
     public double getHeight() {
-        return Player.leftFacingPlayer.getHeight();
+        return Player.images.get(super.getImageState()).getHeight();
     }
 
     public double getWidth() {
-        return Player.leftFacingPlayer.getWidth();
+        return Player.images.get(super.getImageState()).getWidth();
     }
 
     public int getHealth() {
@@ -70,14 +110,26 @@ public class Player extends Entity {
     public String getName() {
         return this.name;
     }
+    public boolean getAttacking() {
+        return this.isAttacking;
+    }
+
+    public boolean getInvincible() {
+        return this.isInvincible;
+    }
 
     // Setter methods
     public void setHealth(int health) {
         this.health = health;
     }
 
-    public void setRightFacing(boolean rightFacing) {
-        this.rightFacing = rightFacing;
+    public void setAttacking(boolean isAttacking) {
+        this.isAttacking = isAttacking;
     }
+
+    public void setInvincible(boolean isInvincible) {
+        this.isInvincible = isInvincible;
+    }
+
 
 }

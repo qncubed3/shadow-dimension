@@ -67,8 +67,9 @@ public class ShadowDimension extends AbstractGame {
 
     // Entities
     private static Player player;
-    private static ArrayList<Obstacle> obstacles = new ArrayList<>();
+    private static ArrayList<Entity> obstacles = new ArrayList<>();
     private static ArrayList<Sinkhole> sinkholes = new ArrayList<>();
+    private static ArrayList<Enemy> enemies = new ArrayList<>();
 
     // Other constants and attributes
     private static final int COLUMN1 = 1;
@@ -193,6 +194,16 @@ public class ShadowDimension extends AbstractGame {
                     xPosition = Integer.parseInt(cells[COLUMN1]);
                     yPosition = Integer.parseInt(cells[2]);
                     sinkholes.add(new Sinkhole(xPosition, yPosition));
+                } else if (cells[0].equals("Demon")) {
+                    // Get sinkhole parameters and add sinkhole to arraylist of sinkholes
+                    xPosition = Integer.parseInt(cells[COLUMN1]);
+                    yPosition = Integer.parseInt(cells[2]);
+                    enemies.add(new Demon(xPosition, yPosition));
+                } else if (cells[0].equals("Navec")) {
+                    // Get sinkhole parameters and add sinkhole to arraylist of sinkholes
+                    xPosition = Integer.parseInt(cells[COLUMN1]);
+                    yPosition = Integer.parseInt(cells[2]);
+                    enemies.add(new Navec(xPosition, yPosition));
                 } else if (cells[0].equals("TopLeft")) {
                     // Get top left coordinate of window
                     topLeft = new Point(Integer.parseInt(cells[COLUMN1]), Integer.parseInt(cells[COLUMN2]));
@@ -234,32 +245,27 @@ public class ShadowDimension extends AbstractGame {
     // Returns true if player will not collide with a wall, false otherwise
     private boolean checkObstacleCollision(Point direction) {
         // Go to each wall
-        for (Obstacle obstacle: obstacles) {
-            // Return false if current direction of player has/will contact a wall
-            if (direction.equals(RIGHT) && player.contactsObstacle(obstacle, RIGHT)) {
-                return false;
-            } else if (direction.equals(LEFT) && player.contactsObstacle(obstacle, LEFT)) {
-                return false;
-            } else if (direction.equals(UP) && player.contactsObstacle(obstacle, UP)) {
-                return false;
-            } else if (direction.equals(DOWN) && player.contactsObstacle(obstacle, DOWN)) {
-                return false;
+        for (Entity obstacle: obstacles) {
+            // Return true if current direction of player has/will contact a wall
+            if (direction.equals(RIGHT) && player.contactsEntity(obstacle, RIGHT)) {
+                return true;
+            } else if (direction.equals(LEFT) && player.contactsEntity(obstacle, LEFT)) {
+                return true;
+            } else if (direction.equals(UP) && player.contactsEntity(obstacle, UP)) {
+                return true;
+            } else if (direction.equals(DOWN) && player.contactsEntity(obstacle, DOWN)) {
+                return true;
             }
         }
         // If no collisions detected for given player direction
-        return true;
+        return false;
 
     }
 
     private void checkSinkholeCollision() {
         for (Sinkhole sinkhole: sinkholes) {
             if (sinkhole.getExists() && player.getBoundary().intersects(sinkhole.getBoundary())) {
-                if (SINKHOLE_DAMAGE > player.getHealth()) {
-                    player.setHealth(0);
-                    gameState = LOSE;
-                } else {
-                    player.setHealth(player.getHealth() - SINKHOLE_DAMAGE);
-                }
+                player.takeDamage(SINKHOLE_DAMAGE);
                 System.out.printf("Sinkhole inflicts %d damage points on %s. %s's current health: %d/%d\n",
                         SINKHOLE_DAMAGE, player.getName(), player.getName(),
                         player.getHealth(), player.getMaxHealth());
@@ -290,7 +296,7 @@ public class ShadowDimension extends AbstractGame {
     // Draw game obstacles
     private void drawObstacles() {
         // Draw all the walls and trees in arraylist of obstacles
-        for (Obstacle obstacle: obstacles) {
+        for (Entity obstacle: obstacles) {
             obstacle.draw();
         }
 
@@ -299,6 +305,12 @@ public class ShadowDimension extends AbstractGame {
             sinkhole.draw();
         }
 
+    }
+
+    private void drawEnemies() {
+        for (Enemy enemy: enemies) {
+            enemy.draw();
+        }
     }
 
     // Displays components of start screen
@@ -320,26 +332,31 @@ public class ShadowDimension extends AbstractGame {
 
     private void runGameScreen(Input input) {
         // Get key input and move if possible
-        if (input.isDown(Keys.LEFT) && checkBorderCollision(LEFT) && checkObstacleCollision(LEFT)) {
+        if (input.isDown(Keys.LEFT) && checkBorderCollision(LEFT) && !checkObstacleCollision(LEFT)) {
             player.move(LEFT);
         }
-        if (input.isDown(Keys.RIGHT) && checkBorderCollision(RIGHT) && checkObstacleCollision(RIGHT)) {
+        if (input.isDown(Keys.RIGHT) && checkBorderCollision(RIGHT) && !checkObstacleCollision(RIGHT)) {
             player.move(RIGHT);
         }
-        if (input.isDown(Keys.UP) && checkBorderCollision(UP) && checkObstacleCollision(UP)) {
+        if (input.isDown(Keys.UP) && checkBorderCollision(UP) && !checkObstacleCollision(UP)) {
             player.move(UP);
         }
-        if (input.isDown(Keys.DOWN) && checkBorderCollision(DOWN) && checkObstacleCollision(DOWN)) {
+        if (input.isDown(Keys.DOWN) && checkBorderCollision(DOWN) && !checkObstacleCollision(DOWN)) {
             player.move(DOWN);
         }
+
+        if (input.isDown(Keys.A)) {
+            player.setAttacking(true);           
+        } 
         
 
         // Check sinkhole overlap
         drawBackground();
         drawObstacles();
         drawHealthBar();
+        drawEnemies();
         checkSinkholeCollision();
-        player.draw();
+        player.updateImage();
 
         // Check win condition
         if (player.getPosition().x >= WIN_POINT.x && player.getPosition().y >= WIN_POINT.y) {

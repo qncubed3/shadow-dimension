@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import bagel.Image;
 import bagel.util.Point;
 import bagel.util.Rectangle;
@@ -5,12 +7,21 @@ import bagel.util.Rectangle;
 public abstract class Entity {
     // Entity attributes
     private Image image = new Image("res/entity.png");
+    private ArrayList<Image> images = new ArrayList<>();
+    private int imageState = 0;
     private Point position;
     private Rectangle boundary;
     private boolean exists;
 
+    public Entity(ArrayList<Image> images, int xPosition, int yPosition) {
+        this.images.addAll(images);
+        this.position = new Point(xPosition, yPosition);
+        this.boundary = new Rectangle(this.getPosition(), image.getWidth(), image.getHeight());
+        this.exists = true;
+    }
+
     public Entity(Image image, int xPosition, int yPosition) {
-        this.image = image;
+        this.images.add(image);
         this.position = new Point(xPosition, yPosition);
         this.boundary = new Rectangle(this.getPosition(), image.getWidth(), image.getHeight());
         this.exists = true;
@@ -24,7 +35,7 @@ public abstract class Entity {
 
     public void draw() {
         if (this.exists) {
-            image.drawFromTopLeft(this.position.x, this.position.y);
+            images.get(imageState).drawFromTopLeft(this.position.x, this.position.y);
         }
     }
 
@@ -55,6 +66,10 @@ public abstract class Entity {
         return this.boundary;
     }
 
+    public int getImageState() {
+        return this.imageState;
+    }
+
     // Setter methods
 
 
@@ -72,6 +87,10 @@ public abstract class Entity {
 
     public void setExists(boolean exists) {
         this.exists = exists;
+    }
+
+    public void setImageState(int state) {
+        this.imageState = state;
     }
 
 
