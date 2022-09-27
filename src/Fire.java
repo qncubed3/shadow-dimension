@@ -1,10 +1,9 @@
 import bagel.Image;
 
 public class Fire extends Entity {
+    private static final String NAME = "Fire";
 
     public Fire(Image image, int xPosition, int yPosition) {
-        super(image, xPosition, yPosition);
-        //TODO Auto-generated constructor stub
+        super(NAME, image, xPosition, yPosition);
     }
-    
 }

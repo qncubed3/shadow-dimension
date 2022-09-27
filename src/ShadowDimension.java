@@ -25,6 +25,8 @@ public class ShadowDimension extends AbstractGame {
     private static final int RED_HEALTH_MAX = 35;
     private static final int ORANGE_HEALTH_MAX = 65;
     private static final Point WIN_POINT = new Point(950, 670);
+    private static final String LEVEL_0_FILE = "res/level0.csv";
+    private static final String LEVEL_1_FILE = "res/level1.csv";
 
     // Direction constants
     private static final Point LEFT = new Point(-SPEED, 0);
@@ -107,7 +109,7 @@ public class ShadowDimension extends AbstractGame {
     // Read level 0
     private static void readLevel0() {
         
-        try (BufferedReader reader = new BufferedReader(new FileReader("res/level0.csv"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(LEVEL_0_FILE))) {
             // Declare buffer parameters
             String buffer = null;
             int playerCount = 0;
@@ -159,7 +161,7 @@ public class ShadowDimension extends AbstractGame {
     // Read level 1
     private static void readLevel1() {
         
-        try (BufferedReader reader = new BufferedReader(new FileReader("res/level1.csv"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(LEVEL_1_FILE))) {
             // Declare buffer parameters
             String buffer = null;
             int playerCount = 0;
@@ -218,6 +220,11 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
+    private void printDamage(Entity A, Entity B) {
+        System.out.printf("%s inflicts %d damage points on %s. %s's current health: %d/%d\n",
+                        A.getName(), A.getDamage(), B.getName(), B.getName(), B.getHealth(), B.getMaxHealth());
+    }
+
     private static void removeObstacles() {
         obstacles.removeAll(obstacles);
         sinkholes.removeAll(sinkholes);
@@ -266,10 +273,27 @@ public class ShadowDimension extends AbstractGame {
         for (Sinkhole sinkhole: sinkholes) {
             if (sinkhole.getExists() && player.getBoundary().intersects(sinkhole.getBoundary())) {
                 player.takeDamage(SINKHOLE_DAMAGE);
-                System.out.printf("Sinkhole inflicts %d damage points on %s. %s's current health: %d/%d\n",
-                        SINKHOLE_DAMAGE, player.getName(), player.getName(),
-                        player.getHealth(), player.getMaxHealth());
+                printDamage(sinkhole, player);
                 sinkhole.setExists(false);
+            }
+        }
+    }
+
+    private void checkEnemyRange() {
+        for (Enemy enemy: enemies) {
+            enemy.inRange(player);
+        }
+    }
+
+    private void checkEnemyDamage() {
+        for (Enemy enemy: enemies) {
+            if (enemy.getExists() && player.getBoundary().intersects(enemy.getFireBoundary())) {
+                if (enemy.getIsDamaging() == false) {
+                    enemy.damagePlayer(player);
+                    printDamage(enemy, player);
+                } 
+            } else {
+                enemy.setIsDamaging(false);
             }
         }
     }
@@ -355,8 +379,10 @@ public class ShadowDimension extends AbstractGame {
         drawObstacles();
         drawHealthBar();
         drawEnemies();
+        checkEnemyRange();
+        checkEnemyDamage();
         checkSinkholeCollision();
-        player.updateImage();
+        player.updateState();
 
         // Check win condition
         if (player.getPosition().x >= WIN_POINT.x && player.getPosition().y >= WIN_POINT.y) {

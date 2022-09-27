@@ -1,4 +1,3 @@
-import java.time.chrono.IsoEra;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -7,9 +6,9 @@ import bagel.util.Point;
 import bagel.util.Rectangle;
 
 
-public class Player extends Entity {
+public class Player extends Entity implements Movable {
     // Player attributes
-    private final String name;
+    private String name = "Player";
     private final int MAX_HEALTH = 100;
     private int health = MAX_HEALTH;
     private boolean isRightFacing = true;
@@ -31,7 +30,7 @@ public class Player extends Entity {
 
     // Player constructor
     public Player(String name, int xInitial, int yInitial) {
-        super(images, xInitial, yInitial);
+        super(name, images, xInitial, yInitial);
         this.name = name;
     }
 
@@ -46,10 +45,10 @@ public class Player extends Entity {
             isRightFacing = true;
         }
         // Update player image if direction has changed
-        updateImage();
+        updateState();
     }
 
-    public void updateImage() {
+    public void updateState() {
         if (attackDuration >= ATTACK_TIME) {
             isAttacking = false;
             attackDuration = 0;
@@ -73,19 +72,7 @@ public class Player extends Entity {
         this.draw();
     }
 
-    // Test if player will contact given wall
-    public boolean contactsEntity(Entity entity, Point direction) {
-        // Calculate the next position of the player
-        if (entity.getExists() == false) {
-            return false;
-        }
-        Rectangle nextBoundary = new Rectangle(
-                super.getPosition().x + direction.x, super.getPosition().y + direction.y,
-                this.getWidth(), this.getHeight()
-        );
-        // Returns true if player will contact wall given current direction in the next step
-        return nextBoundary.intersects(entity.getBoundary());
-    }
+    
 
     public void takeDamage(int damage) {
         health = Math.max(health - damage, 0);
@@ -107,9 +94,7 @@ public class Player extends Entity {
     public int getMaxHealth() {
         return this.MAX_HEALTH;
     }
-    public String getName() {
-        return this.name;
-    }
+    
     public boolean getAttacking() {
         return this.isAttacking;
     }

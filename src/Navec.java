@@ -4,6 +4,7 @@ import java.util.Arrays;
 import bagel.Image;
 
 public class Navec extends Enemy {
+    private static final String NAME = "Navec";
 
     private static ArrayList<Image> images = new ArrayList<>(Arrays.asList(
         new Image("res/navec/navecRight.png"),
@@ -12,13 +13,19 @@ public class Navec extends Enemy {
         new Image("res/navec/navecInvincibleLeft.png")
     ));
 
+    private static Image fireImage = new Image("res/navec/navecfire.png");
+
     private static final int NAVEC_RIGHT = 0;
     private static final int NAVEC_LEFT = 1;
     private static final int INVINCIBLE_RIGHT = 2;
     private static final int INVINCIBLE_LEFT = 3;
 
+    private static final int ATTACK_RANGE = 200;
+    private static final int MAX_HEALTH = 80;
+    private static final int DAMAGE = 20;
+
     public Navec(int xPosition, int yPosition) {
-        super(images, xPosition, yPosition);
+        super(NAME, images, fireImage, xPosition, yPosition, ATTACK_RANGE, MAX_HEALTH, DAMAGE);
     }
     
 }
