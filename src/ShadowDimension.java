@@ -53,7 +53,6 @@ public class ShadowDimension extends AbstractGame {
     private final Font titleMessage = new Font(font, TITLE_SIZE);
     private final Font instructionMessage = new Font(font, MESSAGE_SIZE);
     private final Font winMessage = new Font(font, TITLE_SIZE);
-    private final Font healthBar = new Font(font, HEALTH_SIZE);
     private static final Colour RED = new Colour(1, 0, 0);
     private static final Colour ORANGE = new Colour(0.9f, 0.6f, 0f);
     private static final Colour GREEN = new Colour(0f, 0.8f, 0.2f);
@@ -325,20 +324,21 @@ public class ShadowDimension extends AbstractGame {
     }
 
     // Display health bar
-    private void drawHealthBar() {
-        int healthPercentage = (int) Math.round(player.getHealth() * PERCENT / player.getMaxHealth());
+    public static void drawHealthBar(Entity entity, Point position, int size) {
+        Font healthBar = new Font(font, size);
+        int healthPercentage = (int) Math.round(entity.getHealth() * PERCENT / entity.getMaxHealth());
         String healthDisplay = healthPercentage + "%";
         if (healthPercentage < RED_HEALTH_MAX) {
             healthBar.drawString(
-                    healthDisplay, HEALTH_DISPLAY_POINT.x, HEALTH_DISPLAY_POINT.y,
+                    healthDisplay, position.x, position.y,
                     new DrawOptions().setBlendColour(RED));
         } else if (healthPercentage < ORANGE_HEALTH_MAX) {
             healthBar.drawString(
-                    healthDisplay, HEALTH_DISPLAY_POINT.x, HEALTH_DISPLAY_POINT.y,
+                    healthDisplay, position.x, position.y,
                     new DrawOptions().setBlendColour(ORANGE));
         } else {
             healthBar.drawString(
-                    healthDisplay, HEALTH_DISPLAY_POINT.x, HEALTH_DISPLAY_POINT.y,
+                    healthDisplay, position.x, position.y,
                     new DrawOptions().setBlendColour(GREEN));
         }
     }
@@ -409,7 +409,7 @@ public class ShadowDimension extends AbstractGame {
         // Check sinkhole overlap
         drawBackground();
         drawObstacles();
-        drawHealthBar();
+        drawHealthBar(player, HEALTH_DISPLAY_POINT, HEALTH_SIZE);
         checkEnemyRange();
         checkEnemyDamage();
         checkSinkholeCollision();

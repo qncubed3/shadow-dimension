@@ -12,14 +12,17 @@ public abstract class Entity {
     private Point position;
     private boolean exists;
     private int health = 0;
+    private int maxHealth = 0;
     private int damage = 0;
     private int maxDamage = 0;
 
-    public Entity(String name, ArrayList<Image> images, int xPosition, int yPosition) {
+    public Entity(String name, ArrayList<Image> images, int xPosition, int yPosition, int maxHealth) {
         this.images.addAll(images);
         this.position = new Point(xPosition, yPosition);
         this.exists = true;
         this.name = name;
+        this.maxHealth = maxHealth;
+        this.health = this.maxHealth;
     }
 
     public Entity(String name, Image image, int xPosition, int yPosition) {
@@ -109,11 +112,11 @@ public abstract class Entity {
     }
 
     public int getHealth() {
-        return 0;
+        return this.health;
     }
 
     public int getMaxHealth() {
-        return 0;
+        return this.maxHealth;
     }
 
     public int getDamage() {

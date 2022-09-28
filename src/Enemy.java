@@ -7,7 +7,6 @@ import bagel.util.Rectangle;
 
 public class Enemy extends Entity implements Movable {
 
-    private int maxHealth;
     private int damage;
     private static final int ENEMY_RIGHT = 0;
     private static final int ENEMY_LEFT = 1;
@@ -22,14 +21,12 @@ public class Enemy extends Entity implements Movable {
     private boolean isDamaging = false;
     private Point velocity = new Point(0, 0);
     private int attackRange;
-    private int health = maxHealth;
     private Fire fire;
     private Point vectorToPlayer = new Point(0, 0);
 
     public Enemy(String name, ArrayList<Image> images, Image fireImage, int xPosition, int yPosition, int attackRange, int maxHealth, int damage) {
-        super(name, images, xPosition, yPosition);
+        super(name, images, xPosition, yPosition, maxHealth);
         this.fire = new Fire(fireImage, xPosition, yPosition);
-        this.maxHealth = maxHealth;
         this.damage = damage;
         this.attackRange = attackRange;
     }
@@ -63,6 +60,8 @@ public class Enemy extends Entity implements Movable {
                 }
             }
         }
+        // Draw health
+        ShadowDimension.drawHealthBar(this, new Point(this.getPosition().x, this.getPosition().y - 6), 15);
     }
 
     public void move() {
@@ -125,11 +124,7 @@ public class Enemy extends Entity implements Movable {
             player.takeDamage(damage);
         }
     }
-
-    public int getHealth() {
-        return this.health;
-    }
-
+    
     public int getDamage() {
         return this.damage;
     }

@@ -10,8 +10,8 @@ public class Player extends Entity implements Movable {
     // Player attributes
     private String name = "Player";
     private int speed;
-    private final int MAX_HEALTH = 100;
-    private int health = MAX_HEALTH;
+    private static final int MAX_HEALTH = 100;
+    private static int health = MAX_HEALTH;
     private boolean isRightFacing = true;
     private boolean isAttacking = false;
     private boolean isInvincible = false;
@@ -31,7 +31,7 @@ public class Player extends Entity implements Movable {
 
     // Player constructor
     public Player(String name, int xInitial, int yInitial, int speed) {
-        super(name, images, xInitial, yInitial);
+        super(name, images, xInitial, yInitial, health);
         this.name = name;
         this.speed = speed;
     }
