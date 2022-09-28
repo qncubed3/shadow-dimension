@@ -3,8 +3,8 @@ import java.util.Arrays;
 import bagel.Image;
 
 public class Navec extends Enemy {
-    private static final String NAME = "Navec";
-
+    // Navec attributes
+    private static String name = "Navec";
     private static ArrayList<Image> images = new ArrayList<>(Arrays.asList(
         new Image("res/navec/navecRight.png"),
         new Image("res/navec/navecLeft.png"),
@@ -19,7 +19,7 @@ public class Navec extends Enemy {
     private static final int DAMAGE = 20;
 
     public Navec(int xPosition, int yPosition) {
-        super(NAME, images, fireImage, xPosition, yPosition, ATTACK_RANGE, MAX_HEALTH, DAMAGE);
+        super(name, images, fireImage, xPosition, yPosition, ATTACK_RANGE, MAX_HEALTH, DAMAGE);
     }
     
 }

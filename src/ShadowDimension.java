@@ -29,6 +29,12 @@ public class ShadowDimension extends AbstractGame {
     private static final Point WIN_POINT = new Point(950, 670);
     private static final String LEVEL_0_FILE = "res/level0.csv";
     private static final String LEVEL_1_FILE = "res/level1.csv";
+    private static final int PLAYER_HEALTH = 100;
+    private static final int DEMON_HEALTH = 40;
+    private static final int NAVEC_HEALTH = 80;
+    private static final int PLAYER_DAMAGE = 20;
+    private static final int DEMON_DAMAGE = 10;
+    private static final int NAVEC_DAMAGE = 20;
 
     // Direction constants
     private static final Point LEFT = new Point(-1, 0);
@@ -131,7 +137,7 @@ public class ShadowDimension extends AbstractGame {
                     // Get player parameters and define player
                     xPosition = Integer.parseInt(cells[COLUMN1]);
                     yPosition = Integer.parseInt(cells[COLUMN2]);
-                    player = new Player("Fae", xPosition, yPosition, PLAYER_SPEED);
+                    player = new Player("Fae", xPosition, yPosition, PLAYER_HEALTH, PLAYER_DAMAGE);
                     playerCount++;
                     // If a wall is read
                 } else if (cells[0].equals("Wall")) {
@@ -190,7 +196,7 @@ public class ShadowDimension extends AbstractGame {
                     // Get player parameters and define player
                     xPosition = Integer.parseInt(cells[COLUMN1]);
                     yPosition = Integer.parseInt(cells[COLUMN2]);
-                    player = new Player("Fae", xPosition, yPosition, PLAYER_SPEED);
+                    player = new Player("Fae", xPosition, yPosition, PLAYER_HEALTH, PLAYER_DAMAGE);
                     playerCount++;
                     // If a wall is read
                 } else if (cells[0].equals("Tree")) {
@@ -310,15 +316,30 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    private void checkEnemyDamage() {
+    private void checkDamage() {
         for (Enemy enemy: enemies) {
-            if (enemy.getExists() && player.getBoundary().intersects(enemy.getFireBoundary())) {
-                if (enemy.getIsDamaging() == false) {
-                    enemy.damagePlayer(player);
-                    printDamage(enemy, player);
-                } 
-            } else {
-                enemy.setIsDamaging(false);
+            if (enemy.getExists()) {
+
+                // Check damage from enemy to player
+                if (player.getBoundary().intersects(enemy.getFireBoundary())) {
+                    if (enemy.getIsDamaging() == false) {
+                        enemy.damagePlayer(player);
+                        printDamage(enemy, player);
+                    } 
+                } else {
+                    enemy.setIsDamaging(false);
+                }
+                
+                // Check damage from player to enemy
+                if (player.getAttacking() && player.getBoundary().intersects(enemy.getBoundary())) {
+                    if (player.getIsDamaging() == false) {
+                        player.damageEnemy(enemy);
+                        printDamage(player, enemy);
+                        if (enemy.getHealth() <= 0) {
+                            enemy.setExists(false);
+                        }
+                    }
+                }
             }
         }
     }
@@ -402,6 +423,9 @@ public class ShadowDimension extends AbstractGame {
             if (input.wasPressed(Keys.K)) {
                 Enemy.adjustTimescale(-1);      
             } 
+            if (input.wasPressed(Keys.A)) {
+                player.setAttacking(true);    
+            } 
         }
         
         
@@ -411,7 +435,7 @@ public class ShadowDimension extends AbstractGame {
         drawObstacles();
         drawHealthBar(player, HEALTH_DISPLAY_POINT, HEALTH_SIZE);
         checkEnemyRange();
-        checkEnemyDamage();
+        checkDamage();
         checkSinkholeCollision();
         updateEnemies();
         player.updateState();
@@ -483,5 +507,6 @@ public class ShadowDimension extends AbstractGame {
         if (input.wasPressed(Keys.ESCAPE)){
             Window.close();
         }
+
     }
 }

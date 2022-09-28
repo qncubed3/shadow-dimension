@@ -1,33 +1,34 @@
 import java.util.ArrayList;
-
 import bagel.DrawOptions;
 import bagel.Image;
 import bagel.util.Point;
 import bagel.util.Rectangle;
 
-public class Enemy extends Entity implements Movable {
+public class Enemy extends Entity {
 
-    private int damage;
+    // Enemy attributes
     private static final int ENEMY_RIGHT = 0;
     private static final int ENEMY_LEFT = 1;
     private static final int INVINCIBLE_RIGHT = 2;
     private static final int INVINCIBLE_LEFT = 3;
+
     private static final int MAX_TIMESCALE = 3;
     private static final int MIN_TIMESCALE = -3;
     private static int timescale = 0;
+
     private boolean isAggressive = false;
     private boolean isInvincible = false;
     private boolean isAttacking = false;
     private boolean isDamaging = false;
-    private Point velocity = new Point(0, 0);
-    private int attackRange;
+
     private Fire fire;
+    private int attackRange = 0;
+    private Point velocity = new Point(0, 0);
     private Point vectorToPlayer = new Point(0, 0);
 
     public Enemy(String name, ArrayList<Image> images, Image fireImage, int xPosition, int yPosition, int attackRange, int maxHealth, int damage) {
-        super(name, images, xPosition, yPosition, maxHealth);
+        super(name, images, xPosition, yPosition, maxHealth, damage);
         this.fire = new Fire(fireImage, xPosition, yPosition);
-        this.damage = damage;
         this.attackRange = attackRange;
     }
 
@@ -74,6 +75,9 @@ public class Enemy extends Entity implements Movable {
     }
 
     public void updateState() {
+        if (this.getExists() == false) {
+            return;
+        }
         if (velocity.x < 0) {
             if (isInvincible) {
                 super.setImageState(INVINCIBLE_LEFT);
@@ -121,12 +125,8 @@ public class Enemy extends Entity implements Movable {
     public void damagePlayer(Player player) {
         if (this.getIsDamaging() == false) {
             this.setIsDamaging(true);
-            player.takeDamage(damage);
+            player.takeDamage(this.getDamage());
         }
-    }
-    
-    public int getDamage() {
-        return this.damage;
     }
 
     public boolean getIsDamaging() {

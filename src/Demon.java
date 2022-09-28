@@ -3,8 +3,8 @@ import java.util.Arrays;
 import bagel.Image;
 
 public class Demon extends Enemy {
-    private static final String NAME = "Demon";
-
+    // Demon attributes
+    private static String name = "Demon";
     private static ArrayList<Image> images = new ArrayList<>(Arrays.asList(
         new Image("res/demon/demonRight.png"),
         new Image("res/demon/demonLeft.png"),
@@ -19,7 +19,7 @@ public class Demon extends Enemy {
     private static final int DAMAGE = 10;
 
     public Demon(int xPosition, int yPosition) {
-        super(NAME, images, fireImage, xPosition, yPosition, ATTACK_RANGE, MAX_HEALTH, DAMAGE);
+        super(name, images, fireImage, xPosition, yPosition, ATTACK_RANGE, MAX_HEALTH, DAMAGE);
     }
     
 }

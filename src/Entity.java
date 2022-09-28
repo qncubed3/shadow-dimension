@@ -14,15 +14,15 @@ public abstract class Entity {
     private int health = 0;
     private int maxHealth = 0;
     private int damage = 0;
-    private int maxDamage = 0;
 
-    public Entity(String name, ArrayList<Image> images, int xPosition, int yPosition, int maxHealth) {
+    public Entity(String name, ArrayList<Image> images, int xPosition, int yPosition, int maxHealth, int damage) {
         this.images.addAll(images);
         this.position = new Point(xPosition, yPosition);
         this.exists = true;
         this.name = name;
         this.maxHealth = maxHealth;
         this.health = this.maxHealth;
+        this.damage = damage;
     }
 
     public Entity(String name, Image image, int xPosition, int yPosition) {
@@ -78,6 +78,10 @@ public abstract class Entity {
             this.getPosition().y + this.getHeight() / 2);
     }
 
+    public void takeDamage(int damage) {
+        this.setHealth(Math.max(this.getHealth() - damage, 0));
+    }
+
     // Getter methods
     public Point getPosition() {
         return this.position;
@@ -120,7 +124,7 @@ public abstract class Entity {
     }
 
     public int getDamage() {
-        return 0;
+        return this.damage;
     }
 
     // Setter methods
@@ -138,5 +142,9 @@ public abstract class Entity {
 
     public void setImageState(int state) {
         this.imageState = state;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
     }
 }
