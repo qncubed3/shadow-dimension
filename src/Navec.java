@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import bagel.Image;
 
 public class Navec extends Enemy {
@@ -14,11 +13,6 @@ public class Navec extends Enemy {
     ));
 
     private static Image fireImage = new Image("res/navec/navecfire.png");
-
-    private static final int NAVEC_RIGHT = 0;
-    private static final int NAVEC_LEFT = 1;
-    private static final int INVINCIBLE_RIGHT = 2;
-    private static final int INVINCIBLE_LEFT = 3;
 
     private static final int ATTACK_RANGE = 200;
     private static final int MAX_HEALTH = 80;

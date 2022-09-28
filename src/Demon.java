@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import bagel.Image;
 
 public class Demon extends Enemy {
@@ -14,11 +13,6 @@ public class Demon extends Enemy {
     ));
 
     private static Image fireImage = new Image("res/demon/demonfire.png");
-
-    private static final int DEMON_RIGHT = 0;
-    private static final int DEMON_LEFT = 1;
-    private static final int INVINCIBLE_RIGHT = 2;
-    private static final int INVINCIBLE_LEFT = 3;
 
     private static final int ATTACK_RANGE = 150;
     private static final int MAX_HEALTH = 40;

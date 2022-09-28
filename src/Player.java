@@ -9,6 +9,7 @@ import bagel.util.Rectangle;
 public class Player extends Entity implements Movable {
     // Player attributes
     private String name = "Player";
+    private int speed;
     private final int MAX_HEALTH = 100;
     private int health = MAX_HEALTH;
     private boolean isRightFacing = true;
@@ -29,16 +30,20 @@ public class Player extends Entity implements Movable {
     private static int attackDuration = 0;
 
     // Player constructor
-    public Player(String name, int xInitial, int yInitial) {
+    public Player(String name, int xInitial, int yInitial, int speed) {
         super(name, images, xInitial, yInitial);
         this.name = name;
+        this.speed = speed;
     }
 
 
     // Move player by given vector
     public void move(Point vector) {
         // Update position and boundary of player
-        super.move(vector);
+        if (!ShadowDimension.checkBorderCollision(this, vector)) {
+            super.move(vector);
+        }
+        
         if (vector.x < 0) {
             isRightFacing = false;
         } else if (vector.x > 0) {

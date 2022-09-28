@@ -136,6 +136,4 @@ public abstract class Entity {
     public void setImageState(int state) {
         this.imageState = state;
     }
-
-
 }

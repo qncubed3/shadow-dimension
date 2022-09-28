@@ -9,11 +9,16 @@ public class Enemy extends Entity implements Movable {
 
     private int maxHealth;
     private int damage;
+    private static final int ENEMY_RIGHT = 0;
+    private static final int ENEMY_LEFT = 1;
+    private static final int INVINCIBLE_RIGHT = 2;
+    private static final int INVINCIBLE_LEFT = 3;
 
     private boolean isAggressive = false;
     private boolean isInvincible = false;
     private boolean isAttacking = false;
     private boolean isDamaging = false;
+    private Point velocity = new Point(0, 0);
     private int attackRange;
     private int health = maxHealth;
     private Fire fire;
@@ -58,6 +63,34 @@ public class Enemy extends Entity implements Movable {
         }
     }
 
+    public void move() {
+        if (this.isAggressive) {
+            if (ShadowDimension.checkBorderCollision(this, velocity) || ShadowDimension.checkObstacleCollision(this, velocity)) {
+                velocity = new Point(-velocity.x, -velocity.y);
+            }
+            super.move(velocity);
+        }
+    }
+
+    public void updateState() {
+        if (velocity.x < 0) {
+            if (isInvincible) {
+                super.setImageState(INVINCIBLE_LEFT);
+            } else {
+                super.setImageState(ENEMY_LEFT);
+            }
+        } else if (velocity.x > 0) {
+            if (isInvincible) {
+                super.setImageState(INVINCIBLE_RIGHT);
+            } else {
+                super.setImageState(ENEMY_RIGHT);
+            }
+        }
+        this.move();
+        this.draw();
+    }
+    
+
     // Check if given entity is within a radius of attackRange
     public boolean inRange(Entity entity) {
 
@@ -101,6 +134,14 @@ public class Enemy extends Entity implements Movable {
 
     public void setIsDamaging(boolean isDamaging) {
         this.isDamaging = isDamaging;
+    }
+
+    public void setIsAgressive(boolean isAggressive) {
+        this.isAggressive = isAggressive;
+    }
+
+    public void setVelocity(Point velocity) {
+        this.velocity = velocity;
     }
     
 }

@@ -6,6 +6,8 @@ import bagel.DrawOptions;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Skeleton Code for SWEN20003 Project 1, Semester 2, 2022
@@ -16,7 +18,7 @@ import java.util.ArrayList;
 
 public class ShadowDimension extends AbstractGame {
     // Game settings and constants
-    private static final int SPEED = 2;
+    private final static int PLAYER_SPEED = 2;
     private final int SINKHOLE_DAMAGE = 30;
     private static int WINDOW_WIDTH = 1024;
     private static int WINDOW_HEIGHT = 768;
@@ -29,10 +31,10 @@ public class ShadowDimension extends AbstractGame {
     private static final String LEVEL_1_FILE = "res/level1.csv";
 
     // Direction constants
-    private static final Point LEFT = new Point(-SPEED, 0);
-    private static final Point RIGHT = new Point(SPEED, 0);
-    private static final Point UP = new Point(0, -SPEED);
-    private static final Point DOWN = new Point(0, SPEED);
+    private static final Point LEFT = new Point(-1, 0);
+    private static final Point RIGHT = new Point(1, 0);
+    private static final Point UP = new Point(0, -1);
+    private static final Point DOWN = new Point(0, 1);
 
     // Game state constants
     private static final int START = 0;
@@ -80,8 +82,8 @@ public class ShadowDimension extends AbstractGame {
     private static Rectangle boundary;
     private static int gameState;
     private static int level = LEVEL_0;
-    private static int level_0_read = 0;
-    private static int level_1_read = 0;
+    private static boolean level_0_read = false;
+    private static boolean level_1_read = false;
 
     // Game constructor
     public ShadowDimension() {
@@ -96,13 +98,13 @@ public class ShadowDimension extends AbstractGame {
 
     // Reads data from provided level CSV file
     private static void readCSV() {
-        if (level_0_read == 0 && level == LEVEL_0) {
+        if (level_0_read == false && level == LEVEL_0) {
             readLevel0();
-            level_0_read = 1;
-        } else if (level_1_read == 0 && level == LEVEL_1) {
-            removeObstacles();
+            level_0_read = true;
+        } else if (level_1_read == false && level == LEVEL_1) {
+            clearScene();
             readLevel1();
-            level_1_read = 1;
+            level_1_read = true;
         }
     }
 
@@ -130,7 +132,7 @@ public class ShadowDimension extends AbstractGame {
                     // Get player parameters and define player
                     xPosition = Integer.parseInt(cells[COLUMN1]);
                     yPosition = Integer.parseInt(cells[COLUMN2]);
-                    player = new Player("Fae", xPosition, yPosition);
+                    player = new Player("Fae", xPosition, yPosition, PLAYER_SPEED);
                     playerCount++;
                     // If a wall is read
                 } else if (cells[0].equals("Wall")) {
@@ -143,7 +145,7 @@ public class ShadowDimension extends AbstractGame {
                     // Get sinkhole parameters and add sinkhole to arraylist of sinkholes
                     xPosition = Integer.parseInt(cells[COLUMN1]);
                     yPosition = Integer.parseInt(cells[2]);
-                    sinkholes.add(new Sinkhole(xPosition, yPosition));
+                    obstacles.add(new Sinkhole(xPosition, yPosition));
                 } else if (cells[0].equals("TopLeft")) {
                     // Get top left coordinate of window
                     topLeft = new Point(Integer.parseInt(cells[COLUMN1]), Integer.parseInt(cells[COLUMN2]));
@@ -167,6 +169,13 @@ public class ShadowDimension extends AbstractGame {
             int playerCount = 0;
             int xPosition;
             int yPosition;
+
+            ArrayList<Point> directions = new ArrayList<>(Arrays.asList(UP, RIGHT, DOWN, LEFT));
+            Random random = new Random();
+
+            Demon demon;
+            Boolean movable = false;
+            Navec navec;
             Point topLeft = new Point();
             Point bottomRight = new Point();
             // Read through each line of CSV file and split into array of strings across commas
@@ -182,7 +191,7 @@ public class ShadowDimension extends AbstractGame {
                     // Get player parameters and define player
                     xPosition = Integer.parseInt(cells[COLUMN1]);
                     yPosition = Integer.parseInt(cells[COLUMN2]);
-                    player = new Player("Fae", xPosition, yPosition);
+                    player = new Player("Fae", xPosition, yPosition, PLAYER_SPEED);
                     playerCount++;
                     // If a wall is read
                 } else if (cells[0].equals("Tree")) {
@@ -195,17 +204,26 @@ public class ShadowDimension extends AbstractGame {
                     // Get sinkhole parameters and add sinkhole to arraylist of sinkholes
                     xPosition = Integer.parseInt(cells[COLUMN1]);
                     yPosition = Integer.parseInt(cells[2]);
-                    sinkholes.add(new Sinkhole(xPosition, yPosition));
+                    obstacles.add(new Sinkhole(xPosition, yPosition));
                 } else if (cells[0].equals("Demon")) {
                     // Get sinkhole parameters and add sinkhole to arraylist of sinkholes
                     xPosition = Integer.parseInt(cells[COLUMN1]);
                     yPosition = Integer.parseInt(cells[2]);
-                    enemies.add(new Demon(xPosition, yPosition));
+                    demon = new Demon(xPosition, yPosition);
+                    movable = random.nextBoolean();
+                    demon.setIsAgressive(movable);
+                    if (movable) {
+                        demon.setVelocity(makeVelocity(directions.get(random.nextInt(4)), 0.2 + 0.5 * random.nextDouble()));
+                    }
+                    enemies.add(demon);
                 } else if (cells[0].equals("Navec")) {
                     // Get sinkhole parameters and add sinkhole to arraylist of sinkholes
                     xPosition = Integer.parseInt(cells[COLUMN1]);
                     yPosition = Integer.parseInt(cells[2]);
-                    enemies.add(new Navec(xPosition, yPosition));
+                    navec = new Navec(xPosition, yPosition);
+                    navec.setIsAgressive(true);
+                    navec.setVelocity(makeVelocity(directions.get(random.nextInt(4)), 0.2 + 0.5 * random.nextDouble()));
+                    enemies.add(navec);
                 } else if (cells[0].equals("TopLeft")) {
                     // Get top left coordinate of window
                     topLeft = new Point(Integer.parseInt(cells[COLUMN1]), Integer.parseInt(cells[COLUMN2]));
@@ -220,61 +238,69 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
+    private static Point makeVelocity(Point direction, double speed) {
+        return new Point(direction.x * speed, direction.y * speed);
+    }
+
     private void printDamage(Entity A, Entity B) {
         System.out.printf("%s inflicts %d damage points on %s. %s's current health: %d/%d\n",
                         A.getName(), A.getDamage(), B.getName(), B.getName(), B.getHealth(), B.getMaxHealth());
     }
 
-    private static void removeObstacles() {
+    private static void clearScene() {
         obstacles.removeAll(obstacles);
         sinkholes.removeAll(sinkholes);
+        enemies.removeAll(enemies);
     }
 
-    // Returns true if player is not colliding with the border defined by point, and false if a collision occurs
-    private boolean checkBorderCollision(Point direction) {
+    // Returns true if entity is colliding with border
+    public static boolean checkBorderCollision(Entity entity, Point direction) {
         // Check collision with left border
-        if (direction.equals(LEFT) && player.getPosition().x > boundary.left()) {
-            return true;
-            // Check collision with right border
-        } else if (direction.equals(RIGHT) && player.getPosition().x < boundary.right()) {
-            return true;
-            // Check collision with upper border
-        } else if (direction.equals(UP) && player.getPosition().y > boundary.top()) {
-            return true;
-            // Check collision with lower border
-        } else if (direction.equals(DOWN) && player.getPosition().y < boundary.bottom()) {
-            return true;
-        } else {
+        if (direction.x < 0 && entity.getBoundary().left() > boundary.left()) {
             return false;
+            // Check collision with right border
+        } else if (direction.x > 0 && entity.getBoundary().right() < boundary.right() + player.getWidth()) {
+            return false;
+            // Check collision with upper border
+        } else if (direction.y < 0 && entity.getBoundary().top() > boundary.top()) {
+            return false;
+            // Check collision with lower border
+        } else if (direction.y > 0 && entity.getBoundary().bottom() < boundary.bottom() + player.getHeight()) {
+            return false;
+        } else {
+            return true;
         }
     }
 
-    // Returns true if player will not collide with a wall, false otherwise
-    private boolean checkObstacleCollision(Point direction) {
+    // Returns true if movable entity will collide with an obstacle
+    public static boolean checkObstacleCollision(Entity entity, Point direction) {
         // Go to each wall
         for (Entity obstacle: obstacles) {
-            // Return true if current direction of player has/will contact a wall
-            if (direction.equals(RIGHT) && player.contactsEntity(obstacle, RIGHT)) {
+            // Allow player to collide with sinkhole
+            if (entity instanceof Player && obstacle instanceof Sinkhole) {
+                continue;
+            }
+            // Return true if current direction of entity will contact obstacle
+            if (direction.x > 0 && entity.contactsEntity(obstacle, makeVelocity(RIGHT, PLAYER_SPEED))) {
                 return true;
-            } else if (direction.equals(LEFT) && player.contactsEntity(obstacle, LEFT)) {
+            } else if (direction.x < 0 && entity.contactsEntity(obstacle, makeVelocity(LEFT, PLAYER_SPEED))) {
                 return true;
-            } else if (direction.equals(UP) && player.contactsEntity(obstacle, UP)) {
+            } else if (direction.y < 0 && entity.contactsEntity(obstacle, makeVelocity(UP, PLAYER_SPEED))) {
                 return true;
-            } else if (direction.equals(DOWN) && player.contactsEntity(obstacle, DOWN)) {
+            } else if (direction.y > 0 && entity.contactsEntity(obstacle, makeVelocity(DOWN, PLAYER_SPEED))) {
                 return true;
             }
         }
-        // If no collisions detected for given player direction
         return false;
 
     }
 
     private void checkSinkholeCollision() {
-        for (Sinkhole sinkhole: sinkholes) {
-            if (sinkhole.getExists() && player.getBoundary().intersects(sinkhole.getBoundary())) {
+        for (Entity obstacle: obstacles) {
+            if (obstacle instanceof Sinkhole && obstacle.getExists() && player.getBoundary().intersects(obstacle.getBoundary())) {
                 player.takeDamage(SINKHOLE_DAMAGE);
-                printDamage(sinkhole, player);
-                sinkhole.setExists(false);
+                printDamage(obstacle, player);
+                obstacle.setExists(false);
             }
         }
     }
@@ -331,9 +357,9 @@ public class ShadowDimension extends AbstractGame {
 
     }
 
-    private void drawEnemies() {
+    private void updateEnemies() {
         for (Enemy enemy: enemies) {
-            enemy.draw();
+            enemy.updateState();
         }
     }
 
@@ -356,17 +382,17 @@ public class ShadowDimension extends AbstractGame {
 
     private void runGameScreen(Input input) {
         // Get key input and move if possible
-        if (input.isDown(Keys.LEFT) && checkBorderCollision(LEFT) && !checkObstacleCollision(LEFT)) {
-            player.move(LEFT);
+        if (input.isDown(Keys.LEFT) && !checkBorderCollision(player, LEFT) && !checkObstacleCollision(player, LEFT)) {
+            player.move(makeVelocity(LEFT, PLAYER_SPEED));
         }
-        if (input.isDown(Keys.RIGHT) && checkBorderCollision(RIGHT) && !checkObstacleCollision(RIGHT)) {
-            player.move(RIGHT);
+        if (input.isDown(Keys.RIGHT) && !checkBorderCollision(player, RIGHT) && !checkObstacleCollision(player, RIGHT)) {
+            player.move(makeVelocity(RIGHT, PLAYER_SPEED));
         }
-        if (input.isDown(Keys.UP) && checkBorderCollision(UP) && !checkObstacleCollision(UP)) {
-            player.move(UP);
+        if (input.isDown(Keys.UP) && !checkBorderCollision(player, UP) && !checkObstacleCollision(player, UP)) {
+            player.move(makeVelocity(UP, PLAYER_SPEED));
         }
-        if (input.isDown(Keys.DOWN) && checkBorderCollision(DOWN) && !checkObstacleCollision(DOWN)) {
-            player.move(DOWN);
+        if (input.isDown(Keys.DOWN) && !checkBorderCollision(player, DOWN) && !checkObstacleCollision(player, DOWN)) {
+            player.move(makeVelocity(DOWN, PLAYER_SPEED));
         }
 
         if (input.isDown(Keys.A)) {
@@ -378,11 +404,13 @@ public class ShadowDimension extends AbstractGame {
         drawBackground();
         drawObstacles();
         drawHealthBar();
-        drawEnemies();
         checkEnemyRange();
         checkEnemyDamage();
         checkSinkholeCollision();
+        updateEnemies();
         player.updateState();
+
+        
 
         // Check win condition
         if (player.getPosition().x >= WIN_POINT.x && player.getPosition().y >= WIN_POINT.y) {
@@ -420,6 +448,7 @@ public class ShadowDimension extends AbstractGame {
         // Testing
         if (input.isDown(Keys.W)) {
             level = LEVEL_1;
+            level_1_read = false;
             gameState = START;
         }
 
