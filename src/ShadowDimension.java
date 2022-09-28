@@ -395,9 +395,15 @@ public class ShadowDimension extends AbstractGame {
             player.move(makeVelocity(DOWN, PLAYER_SPEED));
         }
 
-        if (input.isDown(Keys.A)) {
-            player.setAttacking(true);           
-        } 
+        if (level == LEVEL_1) {
+            if (input.wasPressed(Keys.L)) {
+                Enemy.adjustTimescale(1);
+            } 
+            if (input.wasPressed(Keys.K)) {
+                Enemy.adjustTimescale(-1);      
+            } 
+        }
+        
         
 
         // Check sinkhole overlap

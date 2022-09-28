@@ -13,7 +13,9 @@ public class Enemy extends Entity implements Movable {
     private static final int ENEMY_LEFT = 1;
     private static final int INVINCIBLE_RIGHT = 2;
     private static final int INVINCIBLE_LEFT = 3;
-
+    private static final int MAX_TIMESCALE = 3;
+    private static final int MIN_TIMESCALE = -3;
+    private static int timescale = 0;
     private boolean isAggressive = false;
     private boolean isInvincible = false;
     private boolean isAttacking = false;
@@ -68,7 +70,7 @@ public class Enemy extends Entity implements Movable {
             if (ShadowDimension.checkBorderCollision(this, velocity) || ShadowDimension.checkObstacleCollision(this, velocity)) {
                 velocity = new Point(-velocity.x, -velocity.y);
             }
-            super.move(velocity);
+            super.move(scaleVelocity(velocity));
         }
     }
 
@@ -88,6 +90,10 @@ public class Enemy extends Entity implements Movable {
         }
         this.move();
         this.draw();
+    }
+
+    public Point scaleVelocity(Point velocity) {
+        return new Point(velocity.x * Math.pow(1.5, timescale), velocity.y * Math.pow(1.5, timescale));
     }
     
 
@@ -142,6 +148,21 @@ public class Enemy extends Entity implements Movable {
 
     public void setVelocity(Point velocity) {
         this.velocity = velocity;
+    }
+
+    public static void adjustTimescale(int increment) {
+        if (increment > 0) {
+            System.out.print("Sped up, Speed: ");
+            if (Enemy.timescale < MAX_TIMESCALE) {
+                timescale++;
+            }
+        } else if (increment < 0) {
+            System.out.print("Slowed down: ");
+            if (Enemy.timescale > MIN_TIMESCALE) {
+                timescale--;
+            }
+        }
+        System.out.println(timescale);
     }
     
 }
