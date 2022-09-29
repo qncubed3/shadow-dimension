@@ -6,6 +6,19 @@ import bagel.Image;
 
 public class Player extends Entity {
 
+    // Enemy constants
+    private static final int DAMAGE = 20;
+    private static final int MAX_HEALTH = 100;
+    private static final int ATTACK_TIME = 60;
+    private static final int ATTACK_COOLDOWN = 120;
+    private static final int INVINCIBLE_TIME = 180;
+
+    // Player state constants
+    private static final int PLAYER_RIGHT = 0;
+    private static final int PLAYER_LEFT = 1;
+    private static final int ATTACK_RIGHT = 2;
+    private static final int ATTACK_LEFT = 3;
+    
     // Player attributes
     private static String name = "Fae";
     private static ArrayList<Image> images = new ArrayList<>(Arrays.asList(
@@ -14,18 +27,6 @@ public class Player extends Entity {
         new Image("res/fae/faeAttackRight.png"),
         new Image("res/fae/faeAttackLeft.png")
     ));
-
-    private static final int DAMAGE = 20;
-    private static final int MAX_HEALTH = 100;
-    private static final int ATTACK_TIME = 60;
-    private static final int ATTACK_COOLDOWN = 120;
-    private static final int INVINCIBLE_TIME = 180;
-    
-    private static final int PLAYER_RIGHT = 0;
-    private static final int PLAYER_LEFT = 1;
-    private static final int ATTACK_RIGHT = 2;
-    private static final int ATTACK_LEFT = 3;
-
     private boolean isRightFacing = true;
     private boolean isAttacking = false;
     private boolean isDamaging = false;

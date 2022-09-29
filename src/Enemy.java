@@ -7,14 +7,16 @@ import bagel.Image;
 public abstract class Enemy extends Entity {
 
     // Enemy constants
-    private static final int ENEMY_RIGHT = 0;
-    private static final int ENEMY_LEFT = 1;
-    private static final int INVINCIBLE_RIGHT = 2;
-    private static final int INVINCIBLE_LEFT = 3;
     private static final int INVINCIBLE_TIME = 180;
     private static final int MAX_TIMESCALE = 3;
     private static final int MIN_TIMESCALE = -3;
 
+    // Enemy state constants
+    private static final int ENEMY_RIGHT = 0;
+    private static final int ENEMY_LEFT = 1;
+    private static final int INVINCIBLE_RIGHT = 2;
+    private static final int INVINCIBLE_LEFT = 3;
+    
     // Enemy attributes
     private Point vectorToPlayer = new Point(0, 0);
     private Point velocity = new Point(0, 0);

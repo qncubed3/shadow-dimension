@@ -1,6 +1,7 @@
 import bagel.Image;
 
 public class Fire extends Entity {
+    
     // Fire attributes
     private static final String NAME = "Fire";
 

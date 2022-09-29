@@ -6,6 +6,11 @@ import bagel.Image;
 
 public class Demon extends Enemy {
 
+    // Demon constants
+    private static final int DAMAGE = 10;
+    private static final int MAX_HEALTH = 40;
+    private static final int ATTACK_RANGE = 150;
+
     // Demon attributes
     private static String name = "Demon";
     private static ArrayList<Image> images = new ArrayList<>(Arrays.asList(
@@ -14,10 +19,6 @@ public class Demon extends Enemy {
         new Image("res/demon/demonInvincibleRight.png"),
         new Image("res/demon/demonInvincibleLeft.png")
     ));
-
-    private static final int DAMAGE = 10;
-    private static final int MAX_HEALTH = 40;
-    private static final int ATTACK_RANGE = 150;
     private static Image fireImage = new Image("res/demon/demonfire.png");
 
     public Demon(int xPosition, int yPosition) {
