@@ -16,10 +16,12 @@ public class Enemy extends Entity {
     private static final int MIN_TIMESCALE = -3;
     private static int timescale = 0;
 
+    private static final int INVINCIBLE_TIME = 180;
     private boolean isAggressive = false;
     private boolean isInvincible = false;
     private boolean isAttacking = false;
     private boolean isDamaging = false;
+    private int invincibleDuration = 0;
 
     private Fire fire;
     private int attackRange = 0;
@@ -78,13 +80,20 @@ public class Enemy extends Entity {
         if (this.getExists() == false) {
             return;
         }
+        if (invincibleDuration >= INVINCIBLE_TIME) {
+            isInvincible = false;
+            invincibleDuration = 0;
+        }
+        if (isInvincible) {
+            invincibleDuration++;
+        }
         if (velocity.x < 0) {
             if (isInvincible) {
                 super.setImageState(INVINCIBLE_LEFT);
             } else {
                 super.setImageState(ENEMY_LEFT);
             }
-        } else if (velocity.x > 0) {
+        } else {
             if (isInvincible) {
                 super.setImageState(INVINCIBLE_RIGHT);
             } else {
@@ -133,6 +142,11 @@ public class Enemy extends Entity {
         return this.isDamaging;
     }
 
+    public void setInvincible(boolean isInvincible) {
+        this.invincibleDuration = 0;
+        this.isInvincible = isInvincible;
+    }
+
     public void setIsDamaging(boolean isDamaging) {
         this.isDamaging = isDamaging;
     }
@@ -143,6 +157,10 @@ public class Enemy extends Entity {
 
     public void setVelocity(Point velocity) {
         this.velocity = velocity;
+    }
+
+    public void setIsInvincible(boolean isInvincible) {
+        this.isInvincible = isInvincible;
     }
 
     public static void adjustTimescale(int increment) {
@@ -158,6 +176,10 @@ public class Enemy extends Entity {
             }
         }
         System.out.println(timescale);
+    }
+
+    public boolean getInvincible() {
+        return this.isInvincible;
     }
     
 }

@@ -19,12 +19,15 @@ public class Player extends Entity {
 
     private static final int ATTACK_TIME = 60;
     private static final int ATTACK_COOLDOWN = 120;
+    private static final int INVINCIBLE_TIME = 180;
     private boolean isRightFacing = true;
     private boolean isAttacking = false;
     private boolean isDamaging = false;
     private boolean isInvincible = false;
-    private static int attackDuration = 0;
-    private static int cooldownDuration = 0;
+    private boolean isCoolingDown = false;
+    private int attackDuration = 0;
+    private int cooldownDuration = 0;
+    private int invincibleDuration = 0;
 
     // Player constructor
     public Player(String name, int xInitial, int yInitial, int maxHealth, int damage) {
@@ -50,12 +53,27 @@ public class Player extends Entity {
 
     public void updateState() {
         if (attackDuration >= ATTACK_TIME) {
-            isAttacking = false;
             isDamaging = false;
+            isAttacking = false;
+            isCoolingDown = true;
             attackDuration = 0;
+        }
+        if (cooldownDuration >= ATTACK_COOLDOWN) {
+            isCoolingDown = false;
+            cooldownDuration = 0;
+        }
+        if (invincibleDuration >= INVINCIBLE_TIME) {
+            isInvincible = false;
+            invincibleDuration = 0;
         }
         if (isAttacking) {
             attackDuration++;
+        }
+        if (isCoolingDown) {
+            cooldownDuration++;
+        }
+        if (isInvincible) {
+            invincibleDuration++;
         }
         if (!isRightFacing) {
             if (isAttacking) {
@@ -95,10 +113,13 @@ public class Player extends Entity {
 
     // Setter methods
     public void setAttacking(boolean isAttacking) {
-        this.isAttacking = isAttacking;
+        if (!isCoolingDown) {
+            this.isAttacking = isAttacking;
+        }
     }
 
     public void setInvincible(boolean isInvincible) {
+        this.invincibleDuration = 0;
         this.isInvincible = isInvincible;
     }
     

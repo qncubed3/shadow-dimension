@@ -321,9 +321,10 @@ public class ShadowDimension extends AbstractGame {
             if (enemy.getExists()) {
 
                 // Check damage from enemy to player
-                if (player.getBoundary().intersects(enemy.getFireBoundary())) {
+                if (player.getBoundary().intersects(enemy.getFireBoundary()) && player.getInvincible() == false) {
                     if (enemy.getIsDamaging() == false) {
                         enemy.damagePlayer(player);
+                        player.setInvincible(true);
                         printDamage(enemy, player);
                     } 
                 } else {
@@ -331,9 +332,10 @@ public class ShadowDimension extends AbstractGame {
                 }
                 
                 // Check damage from player to enemy
-                if (player.getAttacking() && player.getBoundary().intersects(enemy.getBoundary())) {
+                if (player.getAttacking() && player.getBoundary().intersects(enemy.getBoundary()) && enemy.getInvincible() == false) {
                     if (player.getIsDamaging() == false) {
                         player.damageEnemy(enemy);
+                        enemy.setInvincible(true);
                         printDamage(player, enemy);
                         if (enemy.getHealth() <= 0) {
                             enemy.setExists(false);
@@ -381,6 +383,9 @@ public class ShadowDimension extends AbstractGame {
     private void updateEnemies() {
         for (Enemy enemy: enemies) {
             enemy.updateState();
+            if (enemy instanceof Navec && enemy.getExists() == false) {
+                gameState = WIN;
+            }
         }
     }
 
@@ -507,6 +512,5 @@ public class ShadowDimension extends AbstractGame {
         if (input.wasPressed(Keys.ESCAPE)){
             Window.close();
         }
-
     }
 }
