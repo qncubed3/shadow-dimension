@@ -152,11 +152,11 @@ public class ShadowDimension extends AbstractGame {
     // Reads data from provided level CSV file
     private static void readCSV() {
         if (level_0_read == false && level == LEVEL_0) {
-            readLevel(LEVEL_0);
+            readLevel(LEVEL_0_FILE);
             level_0_read = true;
         } else if (level_1_read == false && level == LEVEL_1) {
             clearScene();
-            readLevel(LEVEL_1);
+            readLevel(LEVEL_1_FILE);
             level_1_read = true;
         }
     }
@@ -424,10 +424,9 @@ public class ShadowDimension extends AbstractGame {
     }
 
     // Read level CSV file
-    private static void readLevel(int level) {
+    private static void readLevel(String levelFile) {
 
         ArrayList<Point> directions = new ArrayList<>(Arrays.asList(UP, RIGHT, DOWN, LEFT));
-        String[] levelFiles = {LEVEL_0_FILE, LEVEL_1_FILE};
         Random random = new Random();
 
         // Buffer parameters
@@ -440,7 +439,7 @@ public class ShadowDimension extends AbstractGame {
         Demon demon;
         Navec navec;   
         
-        try (BufferedReader reader = new BufferedReader(new FileReader(levelFiles[level]))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(levelFile))) {
 
             // Read through each line of CSV file and split into array of strings across commas
             while ((buffer = reader.readLine()) != null) {
