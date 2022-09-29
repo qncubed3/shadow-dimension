@@ -1,83 +1,97 @@
 import java.util.ArrayList;
-import bagel.DrawOptions;
-import bagel.Image;
-import bagel.util.Point;
 import bagel.util.Rectangle;
+import bagel.DrawOptions;
+import bagel.util.Point;
+import bagel.Image;
 
 public abstract class Entity {
+
     // Entity attributes
     private String name = "Entity";
     private ArrayList<Image> images = new ArrayList<>();
     private int imageState = 0;
-    private Point position;
-    private boolean exists;
-    private int health = 0;
     private int maxHealth = 0;
     private int damage = 0;
+    private int health = 0;
+    private boolean exists;
+    private Point position;
 
+    // Entity constructors
     public Entity(String name, ArrayList<Image> images, int xPosition, int yPosition, int maxHealth, int damage) {
-        this.images.addAll(images);
-        this.position = new Point(xPosition, yPosition);
-        this.exists = true;
         this.name = name;
+        this.exists = true;  
+        this.damage = damage;
         this.maxHealth = maxHealth;
         this.health = this.maxHealth;
-        this.damage = damage;
+        this.images.addAll(images);
+        this.position = new Point(xPosition, yPosition);
     }
 
     public Entity(String name, Image image, int xPosition, int yPosition) {
+        this.name = name;
+        this.exists = true;
         this.images.add(image);
         this.position = new Point(xPosition, yPosition);
-        this.exists = true;
-        this.name = name;
     }
 
-    // Test if current entity will contact given entity
-    public boolean contactsEntity(Entity entity, Point direction) {
-        // Calculate the next position of the entity
-        if (entity.getExists() == false) {
-            return false;
-        }
-        Rectangle nextBoundary = new Rectangle(
-                this.getPosition().x + direction.x, this.getPosition().y + direction.y,
-                this.getWidth(), this.getHeight()
-        );
-        // Returns true if current entity will contact entity given current direction in the next step
-        return nextBoundary.intersects(entity.getBoundary());
-    }
-
-    // Returns vector (Point) from center of current entity to center of given entity
-    public Point getVectorTo(Entity entity) {
-        return new Point(entity.getCenter().x - this.getCenter().x, entity.getCenter().y - this.getCenter().y);
-    }
-
+    // Draw entity
     public void draw() {
         if (this.exists) {
             images.get(imageState).drawFromTopLeft(this.position.x, this.position.y);
         }
     }
 
+    // Draw entity using given drawOptions
     public void draw(DrawOptions drawOptions) {
         if (this.exists) {
             images.get(imageState).drawFromTopLeft(this.position.x, this.position.y, drawOptions);
         }
     }
 
+    // Move entity by given vector
     public void move(Point vector) {
         // Update position and boundary of entity
         this.setPosition(this.position.x + vector.x, this.position.y + vector.y);
     }
 
+    // Move entity to given position
     public void moveTo(Point position) {
         this.setPosition(position.x, position.y);
     }
+    
+    // Test if current entity will contact given entity
+    public boolean contactsEntity(Entity entity, Point direction) {
 
+        // No contact if entity does not exist
+        if (entity.getExists() == false) {
+            return false;
+        }
+
+        // Calculate the next position of the entity
+        Rectangle nextBoundary = new Rectangle(
+                this.getPosition().x + direction.x, this.getPosition().y + direction.y,
+                this.getWidth(), this.getHeight()
+        );
+
+        // Returns true if current entity will contact entity given current direction in the next step
+        return nextBoundary.intersects(entity.getBoundary());
+    }
+
+    // Returns vector from center of current entity to center of given entity
+    public Point getVectorTo(Entity entity) {
+        return new Point(
+            entity.getCenter().x - this.getCenter().x, 
+            entity.getCenter().y - this.getCenter().y);
+    }
+
+    // Find the center point of entity
     public Point getCenter() {
         return new Point(
             this.getPosition().x + this.getWidth() / 2,
             this.getPosition().y + this.getHeight() / 2);
     }
 
+    // Reduce health of entity
     public void takeDamage(int damage) {
         this.setHealth(Math.max(this.getHealth() - damage, 0));
     }
@@ -101,10 +115,6 @@ public abstract class Entity {
 
     public Rectangle getBoundary() {
         return new Rectangle(position, this.getWidth(), this.getHeight());
-    }
-
-    public int getImageState() {
-        return this.imageState;
     }
 
     public Image getImage() {

@@ -1,42 +1,46 @@
 import java.util.ArrayList;
-import bagel.DrawOptions;
-import bagel.Image;
-import bagel.util.Point;
 import bagel.util.Rectangle;
+import bagel.DrawOptions;
+import bagel.util.Point;
+import bagel.Image;
 
-public class Enemy extends Entity {
+public abstract class Enemy extends Entity {
 
-    // Enemy attributes
+    // Enemy constants
     private static final int ENEMY_RIGHT = 0;
     private static final int ENEMY_LEFT = 1;
     private static final int INVINCIBLE_RIGHT = 2;
     private static final int INVINCIBLE_LEFT = 3;
-
+    private static final int INVINCIBLE_TIME = 180;
     private static final int MAX_TIMESCALE = 3;
     private static final int MIN_TIMESCALE = -3;
-    private static int timescale = 0;
 
-    private static final int INVINCIBLE_TIME = 180;
+    // Enemy attributes
+    private Point vectorToPlayer = new Point(0, 0);
+    private Point velocity = new Point(0, 0);
     private boolean isAggressive = false;
     private boolean isInvincible = false;
     private boolean isAttacking = false;
     private boolean isDamaging = false;
     private int invincibleDuration = 0;
-
-    private Fire fire;
+    private static int timescale = 0;
     private int attackRange = 0;
-    private Point velocity = new Point(0, 0);
-    private Point vectorToPlayer = new Point(0, 0);
+    private Fire fire;
 
-    public Enemy(String name, ArrayList<Image> images, Image fireImage, int xPosition, int yPosition, int attackRange, int maxHealth, int damage) {
+    // Enemy constructor
+    public Enemy(String name, ArrayList<Image> images, Image fireImage, 
+    int xPosition, int yPosition, int attackRange, int maxHealth, int damage) {
         super(name, images, xPosition, yPosition, maxHealth, damage);
         this.fire = new Fire(fireImage, xPosition, yPosition);
         this.attackRange = attackRange;
     }
 
+    // Draw relevant features of an enemy
     @Override
     public void draw() {
         super.draw();
+
+        // Draw fire if attacking
         if (isAttacking) {
             if (vectorToPlayer.x >= 0) {
                 if (vectorToPlayer.y < 0) {
@@ -63,19 +67,29 @@ public class Enemy extends Entity {
                 }
             }
         }
-        // Draw health
+        
+        // Draw enemy health bar
         ShadowDimension.drawHealthBar(this, new Point(this.getPosition().x, this.getPosition().y - 6), 15);
     }
 
-    public void move() {
+    // Move enemy by given vector
+    @Override
+    public void move(Point velocity) {
+
+        // Only move aggressive entities
         if (this.isAggressive) {
-            if (ShadowDimension.checkBorderCollision(this, velocity) || ShadowDimension.checkObstacleCollision(this, velocity)) {
-                velocity = new Point(-velocity.x, -velocity.y);
+
+            // Change enemy direction if collision detected
+            if (ShadowDimension.checkBorderCollision(this, velocity) 
+            || ShadowDimension.checkObstacleCollision(this, velocity)) {
+                this.velocity = velocity = new Point(-velocity.x, -velocity.y);
             }
             super.move(scaleVelocity(velocity));
         }
+
     }
 
+    // Update enemy state
     public void updateState() {
         if (this.getExists() == false) {
             return;
@@ -100,69 +114,47 @@ public class Enemy extends Entity {
                 super.setImageState(ENEMY_RIGHT);
             }
         }
-        this.move();
+
+        this.move(velocity);
         this.draw();
     }
-
-    public Point scaleVelocity(Point velocity) {
-        return new Point(velocity.x * Math.pow(1.5, timescale), velocity.y * Math.pow(1.5, timescale));
-    }
     
-
-    // Check if given entity is within a radius of attackRange
-    public boolean inRange(Entity entity) {
-
-        // Calculate difference in x and y coordinates
-        double dx = Math.max(0, Math.max(entity.getBoundary().left() - this.getCenter().x, this.getCenter().x - entity.getBoundary().right()));
-        double dy = Math.max(0, Math.max(entity.getBoundary().top() - this.getCenter().y, this.getCenter().y - entity.getBoundary().bottom()));
-
-        if (dx * dx + dy * dy <= attackRange * attackRange) {
-            isAttacking = true;
-            if (entity instanceof Player) {
-                vectorToPlayer = this.getVectorTo(entity);
-            }
-            return true;
-        }
-        isAttacking = false;
-        return false;
-    }
-
-    public Rectangle getFireBoundary() {
-        return fire.getBoundary();
-    }
-
+    // Inflict damage on player
     public void damagePlayer(Player player) {
-        if (this.getIsDamaging() == false) {
-            this.setIsDamaging(true);
+        if (isDamaging == false) {
+            isDamaging = true;
             player.takeDamage(this.getDamage());
         }
     }
 
-    public boolean getIsDamaging() {
-        return this.isDamaging;
+    // Check if given entity is within a radius of attackRange
+    public boolean inRange(Entity entity) {
+        
+        // Calculate difference in x and y coordinates
+        double dx = Math.max(0, Math.max(
+            entity.getBoundary().left() - this.getCenter().x, 
+            this.getCenter().x - entity.getBoundary().right()));
+        double dy = Math.max(0, Math.max(
+            entity.getBoundary().top() - this.getCenter().y, 
+            this.getCenter().y - entity.getBoundary().bottom()));
+
+        // Test for entity within range
+        if (dx * dx + dy * dy <= attackRange * attackRange) {
+            
+            // Update enemy if entity is a player
+            if (entity instanceof Player) {
+                isAttacking = true;
+                vectorToPlayer = this.getVectorTo(entity);
+            }
+
+            return true;
+        }
+
+        isAttacking = false;
+        return false;
     }
 
-    public void setInvincible(boolean isInvincible) {
-        this.invincibleDuration = 0;
-        this.isInvincible = isInvincible;
-    }
-
-    public void setIsDamaging(boolean isDamaging) {
-        this.isDamaging = isDamaging;
-    }
-
-    public void setIsAgressive(boolean isAggressive) {
-        this.isAggressive = isAggressive;
-    }
-
-    public void setVelocity(Point velocity) {
-        this.velocity = velocity;
-    }
-
-    public void setIsInvincible(boolean isInvincible) {
-        this.isInvincible = isInvincible;
-    }
-
+    // Timescale controls
     public static void adjustTimescale(int increment) {
         if (increment > 0) {
             System.out.print("Sped up, Speed: ");
@@ -178,8 +170,39 @@ public class Enemy extends Entity {
         System.out.println(timescale);
     }
 
+    // Scale velocity by timescale
+    public Point scaleVelocity(Point velocity) {
+        return new Point(velocity.x * Math.pow(1.5, timescale), velocity.y * Math.pow(1.5, timescale));
+    }
+
+    // Setter methods
+    public void setInvincible(boolean isInvincible) {
+        this.invincibleDuration = 0;
+        this.isInvincible = isInvincible;
+    }
+
+    public void setDamaging(boolean isDamaging) {
+        this.isDamaging = isDamaging;
+    }
+
+    public void setAgressive(boolean isAggressive) {
+        this.isAggressive = isAggressive;
+    }
+
+    public void setVelocity(Point velocity) {
+        this.velocity = velocity;
+    }
+
+    // Getter methods
     public boolean getInvincible() {
         return this.isInvincible;
     }
-    
+
+    public boolean getIsDamaging() {
+        return this.isDamaging;
+    }
+
+    public Rectangle getFireBoundary() {
+        return fire.getBoundary();
+    }
 }

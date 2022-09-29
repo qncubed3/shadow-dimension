@@ -1,25 +1,31 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import bagel.Image;
 import bagel.util.Point;
+import bagel.Image;
+
 
 public class Player extends Entity {
+
     // Player attributes
+    private static String name = "Fae";
     private static ArrayList<Image> images = new ArrayList<>(Arrays.asList(
         new Image("res/fae/faeRight.png"),
         new Image("res/fae/faeLeft.png"),
         new Image("res/fae/faeAttackRight.png"),
         new Image("res/fae/faeAttackLeft.png")
     ));
+
+    private static final int DAMAGE = 20;
+    private static final int MAX_HEALTH = 100;
+    private static final int ATTACK_TIME = 60;
+    private static final int ATTACK_COOLDOWN = 120;
+    private static final int INVINCIBLE_TIME = 180;
     
     private static final int PLAYER_RIGHT = 0;
     private static final int PLAYER_LEFT = 1;
     private static final int ATTACK_RIGHT = 2;
     private static final int ATTACK_LEFT = 3;
 
-    private static final int ATTACK_TIME = 60;
-    private static final int ATTACK_COOLDOWN = 120;
-    private static final int INVINCIBLE_TIME = 180;
     private boolean isRightFacing = true;
     private boolean isAttacking = false;
     private boolean isDamaging = false;
@@ -30,28 +36,27 @@ public class Player extends Entity {
     private int invincibleDuration = 0;
 
     // Player constructor
-    public Player(String name, int xInitial, int yInitial, int maxHealth, int damage) {
-        super(name, images, xInitial, yInitial, maxHealth, damage);
+    public Player(int xInitial, int yInitial) {
+        super(name, images, xInitial, yInitial, MAX_HEALTH, DAMAGE);
     }
-
 
     // Move player by given vector
     public void move(Point vector) {
-        // Update position and boundary of player
-        if (!ShadowDimension.checkBorderCollision(this, vector)) {
-            super.move(vector);
-        }
-        
+
+        super.move(vector);
+
+        // Change player facing direction
         if (vector.x < 0) {
             isRightFacing = false;
         } else if (vector.x > 0) {
             isRightFacing = true;
         }
-        // Update player image if direction has changed
-        updateState();
     }
 
+    // Update player state
     public void updateState() {
+
+        // State change frame trackers
         if (attackDuration >= ATTACK_TIME) {
             isDamaging = false;
             isAttacking = false;
@@ -66,6 +71,8 @@ public class Player extends Entity {
             isInvincible = false;
             invincibleDuration = 0;
         }
+
+        // Timing increments
         if (isAttacking) {
             attackDuration++;
         }
@@ -75,6 +82,8 @@ public class Player extends Entity {
         if (isInvincible) {
             invincibleDuration++;
         }
+
+        // Change player image based on state
         if (!isRightFacing) {
             if (isAttacking) {
                 super.setImageState(ATTACK_LEFT);
@@ -88,9 +97,12 @@ public class Player extends Entity {
                 super.setImageState(PLAYER_RIGHT);
             }
         }
+
+        // Draw updated player
         this.draw();
     }
 
+    // Inflict damage on given enemy
     public void damageEnemy(Enemy enemy) {
         if (isDamaging == false) {
             isDamaging = true;
@@ -98,6 +110,7 @@ public class Player extends Entity {
         }
     }
 
+    // Getter methods
     public boolean getAttacking() {
         return this.isAttacking;
     }
@@ -109,7 +122,6 @@ public class Player extends Entity {
     public boolean getIsDamaging() {
         return this.isDamaging;
     }
-
 
     // Setter methods
     public void setAttacking(boolean isAttacking) {
@@ -126,7 +138,4 @@ public class Player extends Entity {
     public void setIsDamaging(boolean isDamaging) {
         this.isDamaging = isDamaging;
     }
-
-
-
 }
