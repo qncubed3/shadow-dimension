@@ -306,7 +306,7 @@ public class ShadowDimension extends AbstractGame {
                 // Check damage from enemy to player
                 if (player.getBoundary().intersects(enemy.getFireBoundary()) && player.getInvincible() == false) {
                     if (enemy.getIsDamaging() == false) {
-                        enemy.damagePlayer(player);
+                        enemy.damage(player);
                         player.setInvincible(true);
                         printDamage(enemy, player);
                     } 
@@ -317,7 +317,7 @@ public class ShadowDimension extends AbstractGame {
                 // Check damage from player to enemy
                 if (player.getAttacking() && player.getBoundary().intersects(enemy.getBoundary()) && enemy.getInvincible() == false) {
                     if (player.getIsDamaging() == false) {
-                        player.damageEnemy(enemy);
+                        player.damage(enemy);
                         enemy.setInvincible(true);
                         printDamage(player, enemy);
 
@@ -341,13 +341,13 @@ public class ShadowDimension extends AbstractGame {
         if (player.getInvincible()) {
             return;
         }
-        
+
         // Find sinkholes in arraylist of obstacles
         for (Entity obstacle: obstacles) {
             if (obstacle instanceof Sinkhole && obstacle.getExists() && player.getBoundary().intersects(obstacle.getBoundary())) {
 
                 // Damage player and remove sinkhole if overlap detected
-                player.takeDamage(SINKHOLE_DAMAGE);
+                obstacle.damage(player);
                 printDamage(obstacle, player);
                 obstacle.setExists(false);
             }

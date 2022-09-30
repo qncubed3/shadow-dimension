@@ -103,14 +103,6 @@ public class Player extends Entity {
         this.draw();
     }
 
-    // Inflict damage on given enemy
-    public void damageEnemy(Enemy enemy) {
-        if (isDamaging == false) {
-            isDamaging = true;
-            enemy.takeDamage(this.getDamage());
-        }
-    }
-
     // Getter methods
     public boolean getAttacking() {
         return this.isAttacking;

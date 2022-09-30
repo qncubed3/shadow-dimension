@@ -120,14 +120,6 @@ public abstract class Enemy extends Entity {
         this.move(velocity);
         this.draw();
     }
-    
-    // Inflict damage on player
-    public void damagePlayer(Player player) {
-        if (isDamaging == false) {
-            isDamaging = true;
-            player.takeDamage(this.getDamage());
-        }
-    }
 
     // Check if given entity is within a radius of attackRange
     public boolean inRange(Entity entity) {

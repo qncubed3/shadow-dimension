@@ -27,6 +27,14 @@ public abstract class Entity {
         this.position = new Point(xPosition, yPosition);
     }
 
+    public Entity(String name, Image image, int xPosition, int yPosition, int damage) {
+        this.name = name;
+        this.exists = true;
+        this.damage = damage;
+        this.images.add(image);
+        this.position = new Point(xPosition, yPosition);
+    }
+
     public Entity(String name, Image image, int xPosition, int yPosition) {
         this.name = name;
         this.exists = true;
@@ -95,6 +103,11 @@ public abstract class Entity {
     public void takeDamage(int damage) {
         this.setHealth(Math.max(this.getHealth() - damage, 0));
     }
+
+    // Inflict damage on given entity
+    public void damage(Entity entity) {
+        entity.takeDamage(this.getDamage());
+}
 
     // Getter methods
     public Point getPosition() {
