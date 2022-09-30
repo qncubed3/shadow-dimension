@@ -161,6 +161,82 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
+    // Read level CSV file
+    private static void readLevel(String levelFile) {
+
+        ArrayList<Point> directions = new ArrayList<>(Arrays.asList(UP, RIGHT, DOWN, LEFT));
+        Random random = new Random();
+
+        // Buffer parameters
+        Point bottomRight = new Point();
+        Point topLeft = new Point();
+        Boolean movable = false;
+        String buffer = null;
+        int xPosition;
+        int yPosition;
+        Demon demon;
+        Navec navec;   
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(levelFile))) {
+
+            // Read through each line of CSV file and split into array of strings across commas
+            while ((buffer = reader.readLine()) != null) {
+
+                // Split line into cells 
+                String cells[] = buffer.split(",");
+                xPosition = Integer.parseInt(cells[COLUMN1]);
+                yPosition = Integer.parseInt(cells[COLUMN2]);
+
+                // Player
+                if (cells[0].equals("Fae")|| cells[0].equals("Player")) {
+                    player = new Player(xPosition, yPosition);
+
+                // Wall
+                } else if (cells[0].equals("Wall")) {
+                    obstacles.add(new Wall(xPosition, yPosition));
+
+                // Tree
+                } else if (cells[0].equals("Tree")) {
+                    obstacles.add(new Tree(xPosition, yPosition));
+
+                // Sinkhole
+                } else if (cells[0].equals("Sinkhole")) {
+                    obstacles.add(new Sinkhole(xPosition, yPosition));
+
+                // Demon
+                } else if (cells[0].equals("Demon")) {
+                    demon = new Demon(xPosition, yPosition);
+                    movable = random.nextBoolean();
+                    demon.setAgressive(movable);
+                    if (movable) {
+                        demon.setVelocity(makeVelocity(directions.get(random.nextInt(4)), 0.2 + 0.5 * random.nextDouble()));
+                    }
+                    enemies.add(demon);
+
+                // Navec
+                } else if (cells[0].equals("Navec")) {
+                    navec = new Navec(xPosition, yPosition);
+                    navec.setAgressive(true);
+                    navec.setVelocity(makeVelocity(directions.get(random.nextInt(4)), 0.2 + 0.5 * random.nextDouble()));
+                    enemies.add(navec);
+
+                // Game boundary
+                } else if (cells[0].equals("TopLeft")) {
+                    // Get top left coordinate of window
+                    topLeft = new Point(Integer.parseInt(cells[COLUMN1]), Integer.parseInt(cells[COLUMN2]));
+                } else if (cells[0].equals("BottomRight")) {
+                    // Get bottom right coordinate of window
+                    bottomRight = new Point(Integer.parseInt(cells[COLUMN1]), Integer.parseInt(cells[COLUMN2]));
+                }
+            }
+
+            gameBoundary = new Rectangle(topLeft, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     // Clear all entities
     private static void clearScene() {
         obstacles.removeAll(obstacles);
@@ -183,9 +259,9 @@ public class ShadowDimension extends AbstractGame {
     public static void drawHealthBar(Entity entity, Point position, int size) {
 
         // Percentage calculation and formatting
-        Font healthBar = new Font(FONT, size);
         int healthPercentage = (int) Math.round(entity.getHealth() * PERCENT / entity.getMaxHealth());
         String healthDisplay = healthPercentage + "%";
+        Font healthBar = new Font(FONT, size);
 
         // Colour control depending on percentage
         if (healthPercentage < RED_HEALTH_MAX) {
@@ -261,6 +337,11 @@ public class ShadowDimension extends AbstractGame {
     // Check if player overlaps with sinkhole
     private void checkSinkholeCollision() {
 
+        // Ignore sinkhole if player is invincible
+        if (player.getInvincible()) {
+            return;
+        }
+        
         // Find sinkholes in arraylist of obstacles
         for (Entity obstacle: obstacles) {
             if (obstacle instanceof Sinkhole && obstacle.getExists() && player.getBoundary().intersects(obstacle.getBoundary())) {
@@ -420,82 +501,6 @@ public class ShadowDimension extends AbstractGame {
                 gameState = COMPLETE;
                 level = LEVEL_1;
             }
-        }
-    }
-
-    // Read level CSV file
-    private static void readLevel(String levelFile) {
-
-        ArrayList<Point> directions = new ArrayList<>(Arrays.asList(UP, RIGHT, DOWN, LEFT));
-        Random random = new Random();
-
-        // Buffer parameters
-        Point bottomRight = new Point();
-        Point topLeft = new Point();
-        Boolean movable = false;
-        String buffer = null;
-        int xPosition;
-        int yPosition;
-        Demon demon;
-        Navec navec;   
-        
-        try (BufferedReader reader = new BufferedReader(new FileReader(levelFile))) {
-
-            // Read through each line of CSV file and split into array of strings across commas
-            while ((buffer = reader.readLine()) != null) {
-
-                // Split line into cells 
-                String cells[] = buffer.split(",");
-                xPosition = Integer.parseInt(cells[COLUMN1]);
-                yPosition = Integer.parseInt(cells[COLUMN2]);
-
-                // Player
-                if (cells[0].equals("Fae")|| cells[0].equals("Player")) {
-                    player = new Player(xPosition, yPosition);
-
-                // Wall
-                } else if (cells[0].equals("Wall")) {
-                    obstacles.add(new Wall(xPosition, yPosition));
-
-                // Tree
-                } else if (cells[0].equals("Tree")) {
-                    obstacles.add(new Tree(xPosition, yPosition));
-
-                // Sinkhole
-                } else if (cells[0].equals("Sinkhole")) {
-                    obstacles.add(new Sinkhole(xPosition, yPosition));
-
-                // Demon
-                } else if (cells[0].equals("Demon")) {
-                    demon = new Demon(xPosition, yPosition);
-                    movable = random.nextBoolean();
-                    demon.setAgressive(movable);
-                    if (movable) {
-                        demon.setVelocity(makeVelocity(directions.get(random.nextInt(4)), 0.2 + 0.5 * random.nextDouble()));
-                    }
-                    enemies.add(demon);
-
-                // Navec
-                } else if (cells[0].equals("Navec")) {
-                    navec = new Navec(xPosition, yPosition);
-                    navec.setAgressive(true);
-                    navec.setVelocity(makeVelocity(directions.get(random.nextInt(4)), 0.2 + 0.5 * random.nextDouble()));
-                    enemies.add(navec);
-
-                // Game boundary
-                } else if (cells[0].equals("TopLeft")) {
-                    // Get top left coordinate of window
-                    topLeft = new Point(Integer.parseInt(cells[COLUMN1]), Integer.parseInt(cells[COLUMN2]));
-                } else if (cells[0].equals("BottomRight")) {
-                    // Get bottom right coordinate of window
-                    bottomRight = new Point(Integer.parseInt(cells[COLUMN1]), Integer.parseInt(cells[COLUMN2]));
-                }
-            }
-
-            gameBoundary = new Rectangle(topLeft, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
