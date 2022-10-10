@@ -27,6 +27,13 @@ public abstract class Entity {
         this.position = new Point(xPosition, yPosition);
     }
 
+    public Entity(String name, ArrayList<Image> images, int xPosition, int yPosition) {
+        this.name = name;
+        this.exists = true;
+        this.images.addAll(images);
+        this.position = new Point(xPosition, yPosition);
+    }
+
     public Entity(String name, Image image, int xPosition, int yPosition, int damage) {
         this.name = name;
         this.exists = true;
@@ -150,6 +157,10 @@ public abstract class Entity {
         return this.damage;
     }
 
+    public int getImageState() {
+        return this.imageState;
+    }
+    
     // Setter methods
     public void setPosition(double xPosition, double yPosition) {
         this.position = new Point(xPosition, yPosition);
@@ -170,4 +181,9 @@ public abstract class Entity {
     public void setHealth(int health) {
         this.health = health;
     }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }

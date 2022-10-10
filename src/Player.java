@@ -6,12 +6,13 @@ import bagel.Image;
 
 public class Player extends Entity {
 
-    // Enemy constants
+    // Plaer constants
     private static final int DAMAGE = 20;
     private static final int MAX_HEALTH = 100;
     private static final int ATTACK_TIME = 60;
     private static final int ATTACK_COOLDOWN = 120;
     private static final int INVINCIBLE_TIME = 180;
+    private static final int X_IMAGE_DIFF = 6;
 
     // Player state constants
     private static final int PLAYER_RIGHT = 0;
@@ -35,10 +36,24 @@ public class Player extends Entity {
     private int attackDuration = 0;
     private int cooldownDuration = 0;
     private int invincibleDuration = 0;
+    private boolean pushedBack = false;
 
     // Player constructor
     public Player(int xInitial, int yInitial) {
         super(name, images, xInitial, yInitial, MAX_HEALTH, DAMAGE);
+    }
+
+    @Override
+    public void draw() {
+        if (!isAttacking && pushedBack) {
+            pushedBack = false;
+        }
+        if (isAttacking && isRightFacing && !pushedBack && ShadowDimension.checkObstacleOverlap(this)) {
+            this.move(new Point(-X_IMAGE_DIFF, 0));
+            this.isRightFacing = true;
+            pushedBack = true;
+        } 
+        super.draw();
     }
 
     // Move player by given vector

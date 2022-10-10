@@ -20,7 +20,6 @@ public class ShadowDimension extends AbstractGame {
 
     // Game settings and constants
     private final static int PLAYER_SPEED = 2;
-    private final int SINKHOLE_DAMAGE = 30;
     private static int WINDOW_WIDTH = 1024;
     private static int WINDOW_HEIGHT = 768;
     private final Image BACKGROUND_IMAGE_0 = new Image("res/background0.png");
@@ -349,6 +348,7 @@ public class ShadowDimension extends AbstractGame {
                 // Damage player and remove sinkhole if overlap detected
                 obstacle.damage(player);
                 printDamage(obstacle, player);
+                player.setInvincible(true);
                 obstacle.setExists(false);
             }
         }
@@ -419,6 +419,16 @@ public class ShadowDimension extends AbstractGame {
         }
         return false;
 
+    }
+
+    // Returns true if entity is overlapping with wall or tree
+    public static boolean checkObstacleOverlap(Entity entity) {
+        for (Entity obstacle: obstacles) {
+            if (entity.getBoundary().intersects(obstacle.getBoundary()) && !(obstacle instanceof Sinkhole)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Displays components of start screen. Accepts player inputs.
