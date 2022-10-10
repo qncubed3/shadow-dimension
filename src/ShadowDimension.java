@@ -190,13 +190,9 @@ public class ShadowDimension extends AbstractGame {
                 if (cells[0].equals("Fae")|| cells[0].equals("Player")) {
                     player = new Player(xPosition, yPosition);
 
-                // Wall
-                } else if (cells[0].equals("Wall")) {
-                    obstacles.add(new Wall(xPosition, yPosition));
-
-                // Tree
-                } else if (cells[0].equals("Tree")) {
-                    obstacles.add(new Tree(xPosition, yPosition));
+                // Barrier
+                } else if (Barrier.getBarrierNames().contains(cells[0])) {
+                    obstacles.add(new Barrier(xPosition, yPosition, cells[0]));
 
                 // Sinkhole
                 } else if (cells[0].equals("Sinkhole")) {

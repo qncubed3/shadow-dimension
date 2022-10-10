@@ -12,15 +12,19 @@ public class Barrier extends Entity {
 
     // Barrier labels
     private static ArrayList<String> names = new ArrayList<>(Arrays.asList(
-        "Wall",
-        "Tree"
+        "Tree",
+        "Wall"
     ));
-    
+
     // Wall constructor
     public Barrier(int xPosition, int yPosition, String name) {
         super(NAME, images, xPosition, yPosition);
         this.setImageState(names.indexOf(name));
         this.setName(name);
+    }
+
+    public static ArrayList<String> getBarrierNames() {
+        return Barrier.names;
     }
     
 }
