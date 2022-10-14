@@ -3,28 +3,30 @@ import java.util.Arrays;
 import bagel.Image;
 
 public class Barrier extends Entity {
-    // Barrier attributes
-    private final static String NAME = "Barrier";
+    // Barrier types
     private static ArrayList<Image> images = new ArrayList<>(Arrays.asList(
-        new Image("res/wall.png"),
-        new Image("res/tree.png")
+        new Image("res/grass.png"),
+        new Image("res/tree.png"),
+        new Image("res/tnt.png"),
+        new Image("res/grass.png")
     ));
 
-    // Barrier labels
+    // Barrier labels (note: order must match arraylist of images above)
     private static ArrayList<String> names = new ArrayList<>(Arrays.asList(
+        "Wall",
         "Tree",
-        "Wall"
+        "TNT",
+        "Grass"
     ));
 
-    // Wall constructor
+    // Barrier constructor
     public Barrier(int xPosition, int yPosition, String name) {
-        super(NAME, images, xPosition, yPosition);
+        super(name, images, xPosition, yPosition);
         this.setImageState(names.indexOf(name));
-        this.setName(name);
     }
 
     public static ArrayList<String> getBarrierNames() {
         return Barrier.names;
     }
-    
+
 }

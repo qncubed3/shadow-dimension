@@ -77,14 +77,14 @@ public class ShadowDimension extends AbstractGame {
     private static ArrayList<Enemy> enemies = new ArrayList<>();
 
     // Other constants and attributes
-    private static final int COLUMN1 = 1;
-    private static final int COLUMN2 = 2;
     private static final double PERCENT = 100.0;
     private static final int COMPLETE_TIME = 180;
-    private static int levelCompleteDuration = 0;
+    private static final int COLUMN1 = 1;
+    private static final int COLUMN2 = 2;
+    private static Rectangle gameBoundary;
     private static boolean level_0_read = false;
     private static boolean level_1_read = false;
-    private static Rectangle gameBoundary;
+    private static int levelCompleteDuration = 0;
     private static int level = LEVEL_0;
     private static int gameState;
 
