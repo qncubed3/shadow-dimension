@@ -2,6 +2,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import bagel.Image;
 
+/**
+ * Implements a Demon
+ * @author Quan Nguyen
+ */
 
 
 public class Demon extends Enemy {
@@ -21,6 +25,11 @@ public class Demon extends Enemy {
     ));
     private static Image fireImage = new Image("res/demon/demonfire.png");
 
+    /**
+     * Demon constructor
+     * @param xPosition initial x position
+     * @param yPosition initial y position
+     */
     public Demon(int xPosition, int yPosition) {
         super(name, images, fireImage, xPosition, yPosition, ATTACK_RANGE, MAX_HEALTH, DAMAGE);
     }

@@ -4,6 +4,11 @@ import bagel.DrawOptions;
 import bagel.util.Point;
 import bagel.Image;
 
+/**
+ * Parent class for all entities in the game
+ * @author Quan Nguyen
+ */
+
 public abstract class Entity {
 
     // Entity attributes

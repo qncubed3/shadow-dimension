@@ -1,5 +1,10 @@
 import bagel.Image;
 
+/**
+ * Implements a stationary sinkhole
+ * @author Quan Nguyen
+ */
+
 public class Sinkhole extends Entity {
 
     // Sinkhole attributes
@@ -7,7 +12,11 @@ public class Sinkhole extends Entity {
     private static final int DAMAGE = 30;
     private static final Image sinkholeImage = new Image("res/sinkhole.png");
 
-    // Sinkhole constructor
+    /**
+     * Sinkhole constructor
+     * @param xPosition x position
+     * @param yPosition y position
+     */
     public Sinkhole(int xPosition, int yPosition) {
         super(NAME, sinkholeImage, xPosition, yPosition, DAMAGE);
     }

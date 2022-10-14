@@ -1,3 +1,4 @@
+
 import bagel.*;
 import bagel.DrawOptions;
 import bagel.util.Colour;
@@ -29,7 +30,7 @@ public class ShadowDimension extends AbstractGame {
     private static final Point WIN_POINT = new Point(950, 670);
     private static final String LEVEL_0_FILE = "res/level0.csv";
     private static final String LEVEL_1_FILE = "res/level1.csv";
-    private static final boolean TESTING_MODE = true;
+    private static final boolean TESTING_MODE = false;
 
     // Direction constants
     private static final Point UP = new Point(0, -1);
@@ -48,7 +49,6 @@ public class ShadowDimension extends AbstractGame {
 
     // Font, text and colour settings
     private static final int TITLE_SIZE = 75;
-    private static final int HEALTH_SIZE = 30;
     private static final int MESSAGE_SIZE = 40;
     private static final String FONT = "res/frostbite.ttf";
     private static final String GAME_TITLE = "SHADOW DIMENSION";
@@ -63,7 +63,6 @@ public class ShadowDimension extends AbstractGame {
     private static final Point GAME_TITLE_POINT = new Point(260, 250);
     private static final Point WIN_MESSAGE_POINT = new Point(260, 380);
     private static final Point LOSE_MESSAGE_POINT = new Point(350, 380);
-    private static final Point HEALTH_DISPLAY_POINT = new Point(20, 25);
     private static final Point INSTRUCTION_POINT_1 = new Point(350, 440);
     private static final Point INSTRUCTION_POINT_2 = new Point(300, 550);
     private static final Point INSTRUCTION_POINT_3 = new Point(350, 300);
@@ -94,12 +93,17 @@ public class ShadowDimension extends AbstractGame {
         game.run();
     }
 
-    // Game constructor
+    /**
+     * Game constructor
+     */
     public ShadowDimension() {
         super(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_TITLE);
     }
     
-    // Performs a state update. Allows the game to exit when the escape key is pressed.
+    /**
+     * Performs a state update. Allows the game to exit when the escape key is pressed.
+     * @param input user keyboard input
+     */
     @Override
     protected void update(Input input) {
         
@@ -109,7 +113,7 @@ public class ShadowDimension extends AbstractGame {
         if (TESTING_MODE && input.isDown(Keys.W)) {
             level = LEVEL_1;
             level_1_read = false;
-            gameState = COMPLETE;
+            gameState = RUNNING;
         }
 
         if (gameState == COMPLETE) {
@@ -140,7 +144,7 @@ public class ShadowDimension extends AbstractGame {
         // If player has lost
         if (gameState == LOSE) {
             winMessage.drawString("GAME OVER!", LOSE_MESSAGE_POINT.x,LOSE_MESSAGE_POINT.y);
-        }
+        }     
 
         // Get key to close game
         if (input.wasPressed(Keys.ESCAPE)) {
@@ -148,11 +152,17 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    // Reads data from provided level CSV file
+    /**
+     * Reads data from provided level CSV file
+     */
     private static void readCSV() {
+
+        // If level 0  file not read
         if (level_0_read == false && level == LEVEL_0) {
             readLevel(LEVEL_0_FILE);
             level_0_read = true;
+
+        // If level 1 file not read
         } else if (level_1_read == false && level == LEVEL_1) {
             clearScene();
             readLevel(LEVEL_1_FILE);
@@ -160,7 +170,10 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    // Read level CSV file
+    /**
+     * Read level CSV file
+     * @param levelFile the CSV file to be read from
+     */
     private static void readLevel(String levelFile) {
 
         ArrayList<Point> directions = new ArrayList<>(Arrays.asList(UP, RIGHT, DOWN, LEFT));
@@ -169,7 +182,7 @@ public class ShadowDimension extends AbstractGame {
         // Buffer parameters
         Point bottomRight = new Point();
         Point topLeft = new Point();
-        Boolean movable = false;
+        Boolean isAggressive = false;
         String buffer = null;
         int xPosition;
         int yPosition;
@@ -201,10 +214,10 @@ public class ShadowDimension extends AbstractGame {
                 // Demon
                 } else if (cells[0].equals("Demon")) {
                     demon = new Demon(xPosition, yPosition);
-                    movable = random.nextBoolean();
-                    demon.setAgressive(movable);
-                    if (movable) {
-                        demon.setVelocity(makeVelocity(directions.get(random.nextInt(4)), 0.2 + 0.5 * random.nextDouble()));
+                    isAggressive = random.nextBoolean();
+                    demon.setAgressive(isAggressive);
+                    if (isAggressive) {
+                        demon.setRandomVelocity();
                     }
                     enemies.add(demon);
 
@@ -212,7 +225,7 @@ public class ShadowDimension extends AbstractGame {
                 } else if (cells[0].equals("Navec")) {
                     navec = new Navec(xPosition, yPosition);
                     navec.setAgressive(true);
-                    navec.setVelocity(makeVelocity(directions.get(random.nextInt(4)), 0.2 + 0.5 * random.nextDouble()));
+                    navec.setRandomVelocity();
                     enemies.add(navec);
 
                 // Game boundary
@@ -232,13 +245,17 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    // Clear all entities
+    /**
+     * Clear all entities on the scene
+     */
     private static void clearScene() {
         obstacles.removeAll(obstacles);
         enemies.removeAll(enemies);
     }
 
-    // Draw level background
+    /**
+     * Draw level background
+     */
     private void drawBackground() {
         switch(level) {
             case LEVEL_0: 
@@ -250,7 +267,12 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    // Display health bar
+    /**
+     * Display health bar
+     * @param entity health of entity to be displayed
+     * @param position top right point of health display
+     * @param size font size of health 
+     */
     public static void drawHealthBar(Entity entity, Point position, int size) {
 
         // Percentage calculation and formatting
@@ -274,8 +296,10 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    // Draw game obstacles
-    private void drawObstacles() {
+    /**
+     * Draw game obstacles
+     */
+    private static void drawObstacles() {
 
         // Draw all the walls and trees in arraylist of obstacles
         for (Entity obstacle: obstacles) {
@@ -283,16 +307,20 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    // Check if player is within attack range of enemies
-    private void checkEnemyRange() {
+    /**
+     * Check if player is within attack range of enemies
+     */
+    private static void checkEnemyRange() {
         for (Enemy enemy: enemies) {
             // If player in range, set enemy isAttacking to true
             enemy.inRange(player);
         }
     }
-
-    // Check for damage inflicted amongst entities
-    private void checkDamage() {
+ 
+    /**
+     * Check for damage inflicted amongst entities
+     */
+    private static void checkDamage() {
 
         // Interactions between player and enemies
         for (Enemy enemy: enemies) {
@@ -329,8 +357,10 @@ public class ShadowDimension extends AbstractGame {
         checkSinkholeCollision();
     }
 
-    // Check if player overlaps with sinkhole
-    private void checkSinkholeCollision() {
+    /**
+     * Check if player overlaps with sinkhole
+     */
+    private static void checkSinkholeCollision() {
 
         // Ignore sinkhole if player is invincible
         if (player.getInvincible()) {
@@ -350,8 +380,10 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    // Update state of all enemies
-    private void updateEnemies() {
+    /**
+     * Update state of all enemies
+     */
+    public static void updateEnemies() {
         for (Enemy enemy: enemies) {
             enemy.updateState();
             if (enemy instanceof Navec && enemy.getExists() == false) {
@@ -360,20 +392,30 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    // Update state of player
-    private void updatePlayer() {
+    /**
+     * Update state of player
+     */
+    public static void updatePlayer() {
         player.updateState();
     }
 
-    
-
-    // Returns true if entity collides with obstacles or border in given direction
-    private boolean checkCollisions(Entity entity, Point direction) {
+    /**
+     * Returns true if entity collides with obstacles or border in given direction
+     * @param entity entity to check collision
+     * @param direction current direction of entity
+     * @return if entity will collide
+     */
+    private static boolean checkCollisions(Entity entity, Point direction) {
         return checkBorderCollision(entity, direction) 
             || checkObstacleCollision(entity, direction);
     }
 
-    // Returns true if entity is colliding with border
+    /**
+     * Returns true if entity is colliding with border
+     * @param entity entity to check colision
+     * @param direction current direction of entity
+     * @return if entity will collide
+     */
     public static boolean checkBorderCollision(Entity entity, Point direction) {
         // Check collision with left border
         if (direction.x < 0 && entity.getBoundary().left() > gameBoundary.left()) {
@@ -392,7 +434,12 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    // Returns true if movable entity will collide with an obstacle
+    /**
+     * Returns true if movable entity will collide with an obstacle
+     * @param entity entity to check collision
+     * @param direction current direction of entity
+     * @return if entity will collide
+     */
     public static boolean checkObstacleCollision(Entity entity, Point direction) {
 
         for (Entity obstacle: obstacles) {
@@ -417,7 +464,11 @@ public class ShadowDimension extends AbstractGame {
 
     }
 
-    // Returns true if entity is overlapping with wall or tree
+    /**
+     * Returns true if entity is overlapping with wall or tree
+     * @param entity entity to check overlap
+     * @return if entity overlaps with any obstacles
+     */
     public static boolean checkObstacleOverlap(Entity entity) {
         for (Entity obstacle: obstacles) {
             if (entity.getBoundary().intersects(obstacle.getBoundary()) && !(obstacle instanceof Sinkhole)) {
@@ -427,7 +478,10 @@ public class ShadowDimension extends AbstractGame {
         return false;
     }
 
-    // Displays components of start screen. Accepts player inputs.
+    /**
+     * Displays components of start screen. Accepts player inputs.
+     * @param input user keyboard input
+     */
     private void runStartScreen(Input input) {
 
         // Display text for level start screens
@@ -447,8 +501,11 @@ public class ShadowDimension extends AbstractGame {
         }
     }
 
-    // Displays components of game. Accepts player inputs.
-    private void runGameScreen(Input input) {
+    /**
+     * Control the player using arrow keys
+     * @param input user keyboard input
+     */
+    private static void controlPlayer(Input input) {
 
         // Get key input and move if possible
         if (input.isDown(Keys.LEFT) && !checkCollisions(player, LEFT)) {
@@ -463,11 +520,19 @@ public class ShadowDimension extends AbstractGame {
         if (input.isDown(Keys.DOWN) && !checkCollisions(player, DOWN)) {
             player.move(makeVelocity(DOWN, PLAYER_SPEED));
         }
+
+        // Control player attack
         if (input.wasPressed(Keys.A)) {
             player.setAttacking(true);    
-        } 
+        }
+    }
 
-        // Keyboard inputs for level 1
+    /**
+     * Timescale controls using K and L keys
+     * @param input user keyboard input
+     */
+    private static void controlTimescale(Input input) {
+
         if (level == LEVEL_1) {
             if (input.wasPressed(Keys.L)) {
                 Enemy.adjustTimescale(1);
@@ -475,13 +540,23 @@ public class ShadowDimension extends AbstractGame {
             if (input.wasPressed(Keys.K)) {
                 Enemy.adjustTimescale(-1);      
             } 
-            
         }
+        
+    }
+
+    /**
+     * Displays components of game. Accepts player inputs.
+     * @param input user keyboard inputs
+     */
+    private void runGameScreen(Input input) {
+
+        // Manage keyboard inputs
+        controlPlayer(input);
+        controlTimescale(input);
         
         // Draw level scene
         drawBackground();
         drawObstacles();
-        drawHealthBar(player, HEALTH_DISPLAY_POINT, HEALTH_SIZE);
 
         // Check interactions between entities
         checkEnemyRange();
@@ -491,33 +566,57 @@ public class ShadowDimension extends AbstractGame {
         updateEnemies();
         updatePlayer();
 
-        // Check win conditions
+        // Check win and lose conditions
         checkWinCondition();
+        checkLoseCondition();
 
-        // Check lose condition
+    }
+
+    /**
+     * Check win conditions
+     */
+    private static void checkWinCondition() {
+        if (level == LEVEL_0 && player.getPosition().x >= WIN_POINT.x && player.getPosition().y >= WIN_POINT.y) {
+            gameState = COMPLETE;
+            level = LEVEL_1;
+        }
+    }
+
+    /**
+     * 
+     */
+    private static void checkLoseCondition() {
         if (player.getHealth() <= 0) {
             gameState = LOSE;
         }
     }
 
-    // Check win conditions
-    private void checkWinCondition() {
-        if (level == LEVEL_0) {
-            if (player.getPosition().x >= WIN_POINT.x && player.getPosition().y >= WIN_POINT.y) {
-                gameState = COMPLETE;
-                level = LEVEL_1;
-            }
-        }
-    }
-
-    // Print damage entity A inflicts on entity B
-    private void printDamage(Entity A, Entity B) {
+    /**
+     * Print damage entity A inflicts on entity B
+     * @param A the attacking entity
+     * @param B the defending entity
+     */
+    private static void printDamage(Entity A, Entity B) {
         System.out.printf("%s inflicts %d damage points on %s. %s's current health: %d/%d\n",
                         A.getName(), A.getDamage(), B.getName(), B.getName(), B.getHealth(), B.getMaxHealth());
     }
 
-    // Return vector given unit vector and speed
-    private static Point makeVelocity(Point direction, double speed) {
+    /**
+     * Return vector given unit vector and speed
+     * @param direction unit vector direction
+     * @param speed magnitude of vector
+     * @return
+     */
+    public static Point makeVelocity(Point direction, double speed) {
         return new Point(direction.x * speed, direction.y * speed);
     }
+
+    /**
+     * Provide external classes with direction constants
+     * @return list of unit direction constants
+     */
+    public static ArrayList<Point> directionList() {
+        return new ArrayList<>(Arrays.asList(UP, RIGHT, DOWN, LEFT));
+    }
+    
 }

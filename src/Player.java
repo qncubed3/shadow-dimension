@@ -3,16 +3,22 @@ import java.util.Arrays;
 import bagel.util.Point;
 import bagel.Image;
 
+/**
+ * The player controlled by the user
+ * @author Quan Nguyen
+ */
 
 public class Player extends Entity {
 
-    // Plaer constants
+    // Player constants
     private static final int DAMAGE = 20;
     private static final int MAX_HEALTH = 100;
     private static final int ATTACK_TIME = 60;
     private static final int ATTACK_COOLDOWN = 120;
     private static final int INVINCIBLE_TIME = 180;
     private static final int X_IMAGE_DIFF = 6;
+    private static final Point HEALTH_DISPLAY_POINT = new Point(20, 25);
+    private static final int HEALTH_SIZE = 30;
 
     // Player state constants
     private static final int PLAYER_RIGHT = 0;
@@ -38,11 +44,18 @@ public class Player extends Entity {
     private int invincibleDuration = 0;
     private boolean pushedBack = false;
 
-    // Player constructor
+    /**
+     * Player constructor
+     * @param xInitial initial x position
+     * @param yInitial initial y position
+     */
     public Player(int xInitial, int yInitial) {
         super(name, images, xInitial, yInitial, MAX_HEALTH, DAMAGE);
     }
 
+    /**
+     * Draw the player and healthbar
+     */
     @Override
     public void draw() {
         if (!isAttacking && pushedBack) {
@@ -53,10 +66,18 @@ public class Player extends Entity {
             this.isRightFacing = true;
             pushedBack = true;
         } 
+
+        // Draw player health bar
+        ShadowDimension.drawHealthBar(this, HEALTH_DISPLAY_POINT, HEALTH_SIZE);
+
+        // Draw the player
         super.draw();
     }
 
-    // Move player by given vector
+    /**
+     * Move player by given vector
+     * @param vector vector to move player along in the next frame
+     */
     public void move(Point vector) {
 
         super.move(vector);

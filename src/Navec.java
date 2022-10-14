@@ -2,7 +2,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import bagel.Image;
 
-
+/**
+ * Implements a Navec
+ * @author Quan Nguyen
+ */
 
 public class Navec extends Enemy {
 
@@ -21,6 +24,11 @@ public class Navec extends Enemy {
     ));
     private static Image fireImage = new Image("res/navec/navecfire.png");
 
+    /**
+     * Navec constructor
+     * @param xPosition initial x position
+     * @param yPosition initial y position
+     */
     public Navec(int xPosition, int yPosition) {
         super(name, images, fireImage, xPosition, yPosition, ATTACK_RANGE, MAX_HEALTH, DAMAGE);
     }

@@ -1,8 +1,16 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+
 import bagel.util.Rectangle;
 import bagel.DrawOptions;
 import bagel.util.Point;
 import bagel.Image;
+
+/**
+ * Parent class for Demon and Navec
+ * @author Quan Nguyen
+ */
 
 public abstract class Enemy extends Entity {
 
@@ -10,6 +18,8 @@ public abstract class Enemy extends Entity {
     private static final int INVINCIBLE_TIME = 180;
     private static final int MAX_TIMESCALE = 3;
     private static final int MIN_TIMESCALE = -3;
+    private static final double MIN_SPEED = 0.2;
+    private static final double MAX_SPEED = 0.5;
 
     // Enemy state constants
     private static final int ENEMY_RIGHT = 0;
@@ -29,7 +39,17 @@ public abstract class Enemy extends Entity {
     private int attackRange = 0;
     private Fire fire;
 
-    // Enemy constructor
+    /**
+     * Enemy constructor
+     * @param name name of enemy
+     * @param images list of state images
+     * @param fireImage fire image for enemy
+     * @param xPosition initial x position
+     * @param yPosition initial y position
+     * @param attackRange distance from player to start attacking
+     * @param maxHealth maximum starting health of enemy
+     * @param damage damage dealt to player
+     */
     public Enemy(String name, ArrayList<Image> images, Image fireImage, 
     int xPosition, int yPosition, int attackRange, int maxHealth, int damage) {
         super(name, images, xPosition, yPosition, maxHealth, damage);
@@ -37,7 +57,9 @@ public abstract class Enemy extends Entity {
         this.attackRange = attackRange;
     }
 
-    // Draw relevant features of an enemy
+    /**
+     * Draw relevant features of an enemy
+     */
     @Override
     public void draw() {
         super.draw();
@@ -74,7 +96,10 @@ public abstract class Enemy extends Entity {
         ShadowDimension.drawHealthBar(this, new Point(this.getPosition().x, this.getPosition().y - 6), 15);
     }
 
-    // Move enemy by given vector
+    /**
+     * Move enemy by given vector
+     * @param velocity the vector to move enemy along in the next frame
+     */
     @Override
     public void move(Point velocity) {
 
@@ -91,7 +116,9 @@ public abstract class Enemy extends Entity {
 
     }
 
-    // Update enemy state
+    /**
+     * Update enemy state
+     */
     public void updateState() {
         if (this.getExists() == false) {
             return;
@@ -121,7 +148,11 @@ public abstract class Enemy extends Entity {
         this.draw();
     }
 
-    // Check if given entity is within a radius of attackRange
+    /**
+     * Check if given entity is within a radius of attackRange
+     * @param entity the target entity to test
+     * @return true if target entity is in range of this enemy
+     */
     public boolean inRange(Entity entity) {
         
         // Calculate difference in x and y coordinates
@@ -148,7 +179,10 @@ public abstract class Enemy extends Entity {
         return false;
     }
 
-    // Timescale controls
+    /**
+     * Timescale controls
+     * @param increment how much to change the timescale
+     */
     public static void adjustTimescale(int increment) {
         if (increment > 0) {
             System.out.print("Sped up, Speed: ");
@@ -164,9 +198,26 @@ public abstract class Enemy extends Entity {
         System.out.println(timescale);
     }
 
-    // Scale velocity by timescale
+    /**
+     * Scale velocity by timescale
+     * @param velocity initial velocity
+     * @return scaled velocity
+     */
     public Point scaleVelocity(Point velocity) {
         return new Point(velocity.x * Math.pow(1.5, timescale), velocity.y * Math.pow(1.5, timescale));
+    }
+
+    /**
+     * Set a random direction and speed at creation
+     */
+    public void setRandomVelocity() {
+        Random random = new Random();
+        this.setVelocity(
+            ShadowDimension.makeVelocity(
+                ShadowDimension.directionList().get(random.nextInt(4)), 
+                MIN_SPEED + MAX_SPEED * random.nextDouble()
+            )
+        );
     }
 
     // Setter methods
